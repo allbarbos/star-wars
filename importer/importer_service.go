@@ -8,6 +8,7 @@ import (
 	"star-wars/swapi"
 )
 
+// Service contract
 type Service interface {
 	Process(planet entity.Planet, errchan chan<- string) error
 }
@@ -17,6 +18,7 @@ type service struct {
 	swapiSrv swapi.Service
 }
 
+// NewImporter returns a importer service instance
 func NewImporter(s planet.Service, swapi swapi.Service) Service {
 	return &service{
 		planetSrv: s,

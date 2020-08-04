@@ -9,12 +9,14 @@ import (
 	"star-wars/swapi/adapter"
 )
 
+// Service contract
 type Service interface {
 	GetPlanetExternally(name string) (adapter.Planets, error)
 }
 
 type swapi struct {}
 
+// New returns a swapi service instance
 func New() Service {
 	return &swapi{}
 }

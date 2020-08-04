@@ -15,6 +15,7 @@ type Planet struct {
 	TotalFilms int `json:"totalFilms" bson:"totalFilms,omitempty"`
 }
 
+// IsEmpty validate fields
 func (p Planet) IsEmpty(fields []string) bool {
 	for _, key := range fields {
 		value := reflect.ValueOf(p).FieldByName(key)
@@ -26,6 +27,7 @@ func (p Planet) IsEmpty(fields []string) bool {
 	return false
 }
 
+// TotalAppearances counts film appearances
 func (p Planet) TotalAppearances(adapter []adapter.Planet) (int, error) {
 	if len(adapter) != 1 {
 		return 0, errors.New("search did not return the planet")
