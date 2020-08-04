@@ -71,13 +71,12 @@ func main() {
 		s := swapi.New()
 		srv := importer.NewImporter(p, s)
 
-		errchan := make(chan entity.Planet)
+		errchan := make(chan string)
 
 		go srv.Process(newPlanet, errchan)
 
-		for p := range errchan {
-			log.Println(p)
+		for e := range errchan {
+			log.Print(e)
 		}
-
 	}
 }

@@ -27,7 +27,6 @@ func (s srv) Exists(name string) (bool, error) {
 	planetDb, err := s.repo.FindByName(name)
 
 	if err != nil && err.Error() != "mongo: no documents in result" {
-		log.Print(err)
 		return false, err
 	}
 

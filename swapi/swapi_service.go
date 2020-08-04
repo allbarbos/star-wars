@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"star-wars/swapi/adapter"
 )
@@ -21,7 +22,7 @@ func New() Service {
 func (s swapi) GetPlanetExternally(name string) (adapter.Planets, error) {
 	var adapter adapter.Planets
 
-	resp, err := http.Get(os.Getenv("SWAPI_URL") + "/planets/?search=" + name)
+	resp, err := http.Get(os.Getenv("SWAPI_URL") + "/planets/?search=" + url.QueryEscape(name))
 
 	if err != nil {
 		log.Print(err)

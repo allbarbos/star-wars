@@ -1,14 +1,15 @@
 package importer
 
 import (
-	"log"
+	"errors"
+	"fmt"
 	"star-wars/entity"
 	"star-wars/planet"
 	"star-wars/swapi"
 )
 
 type Service interface {
-	Process(planet entity.Planet, errchan chan entity.Planet) error
+	Process(planet entity.Planet, errchan chan<- string) error
 }
 
 type service struct {
@@ -23,35 +24,31 @@ func NewImporter(s planet.Service, swapi swapi.Service) Service {
 	}
 }
 
-func (i service) Process(planet entity.Planet, errchan chan entity.Planet) error {
+func (i service) Process(planet entity.Planet, errchan chan<- string) error {
 	defer close(errchan)
 	exists, err := i.planetSrv.Exists(planet.Name)
 
 	if err != nil {
-		errchan <- planet
-
-		log.Print(err)
+		errchan <- fmt.Sprintf("%s: %s", planet.Name, err.Error())
 		return err
 	}
 
 	if exists {
-		errchan <- planet
-		log.Print("planet already registered")
-		return nil
+		err := errors.New("planet already registered")
+		errchan <- fmt.Sprintf("%s: %s", planet.Name, err.Error())
+		return err
 	}
 
 	adapter, err := i.swapiSrv.GetPlanetExternally(planet.Name)
 
 	if err != nil {
-		errchan <- planet
-		log.Print(err)
+		errchan <- fmt.Sprintf("%s: %s", planet.Name, err.Error())
 		return err
 	}
 
 	total, err := planet.TotalAppearances(adapter.Results)
 	if err != nil {
-		errchan <- planet
-		log.Print(err)
+		errchan <- fmt.Sprintf("%s: %s", planet.Name, err.Error())
 		return err
 	}
 
@@ -60,8 +57,7 @@ func (i service) Process(planet entity.Planet, errchan chan entity.Planet) error
 	err = i.planetSrv.Save(planet)
 
 	if err != nil {
-		errchan <- planet
-		log.Print(err)
+		errchan <- fmt.Sprintf("%s: %s", planet.Name, err.Error())
 		return err
 	}
 
