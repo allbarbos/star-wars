@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"star-wars/db"
 	"star-wars/entity"
 	"star-wars/importer"
 	"star-wars/planet"
@@ -65,8 +64,7 @@ func main() {
 			continue
 		}
 
-		d := db.New()
-		r := planet.NewRepository(d)
+		r := planet.NewRepository()
 		p := planet.NewService(r)
 		s := swapi.New()
 		srv := importer.NewImporter(p, s)

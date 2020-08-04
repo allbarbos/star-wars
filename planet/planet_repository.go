@@ -3,10 +3,13 @@ package planet
 import (
 	"context"
 	"log"
-	"star-wars/db"
+	"os"
 	"star-wars/entity"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const planetsCollection = "planets"
@@ -18,13 +21,26 @@ type Repository interface {
 }
 
 type repo struct {
-	DB db.Database
+	DB *mongo.Database
 }
 
 // NewRepository returns a planet repository instance
-func NewRepository(db db.Database) Repository {
+func NewRepository() Repository {
+	name := os.Getenv("DB_NAME")
+	uri := os.Getenv("DB_HOST")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	options := options.Client().ApplyURI(uri)
+	client, err := mongo.Connect(ctx, options)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return &repo{
-		DB: db,
+		DB: client.Database(name),
 	}
 }
 
