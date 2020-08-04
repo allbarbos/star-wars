@@ -3,7 +3,7 @@ package entity
 import (
 	"errors"
 	"reflect"
-	"star-wars/entity/adapter"
+	"star-wars/swapi/adapter"
 )
 
 // Planet entity

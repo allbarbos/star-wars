@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"star-wars/entity/adapter"
+	"star-wars/swapi/adapter"
 )
 
 type Service interface {

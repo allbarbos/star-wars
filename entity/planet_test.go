@@ -2,7 +2,7 @@ package entity
 
 import (
 	"errors"
-	"star-wars/entity/adapter"
+	"star-wars/swapi/adapter"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

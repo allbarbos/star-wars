@@ -6,7 +6,7 @@ package mock_swapi
 
 import (
 	reflect "reflect"
-	"star-wars/entity/adapter"
+	"star-wars/swapi/adapter"
 
 	gomock "github.com/golang/mock/gomock"
 )

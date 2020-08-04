@@ -43,7 +43,6 @@ func (i service) Process(planet entity.Planet) error {
 		return err
 	}
 
-	// Obtém a quantidade de aparições em filmes e salva no banco de dados
 	total, err := planet.TotalAppearances(adapter.Results)
 	if err != nil {
 		log.Print(err)

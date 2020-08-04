@@ -3,8 +3,8 @@ package importer
 import (
 	"errors"
 	"star-wars/entity"
-	"star-wars/entity/adapter"
 	"star-wars/planet/mock_planet"
+	"star-wars/swapi/adapter"
 	"star-wars/swapi/mock_swapi"
 
 	"testing"
