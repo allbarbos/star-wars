@@ -8,7 +8,7 @@ import (
 )
 
 type Service interface {
-	Process(planet entity.Planet) error
+	Process(planet entity.Planet, errchan chan entity.Planet) error
 }
 
 type service struct {
@@ -23,15 +23,19 @@ func NewImporter(s planet.Service, swapi swapi.Service) Service {
 	}
 }
 
-func (i service) Process(planet entity.Planet) error {
+func (i service) Process(planet entity.Planet, errchan chan entity.Planet) error {
+	defer close(errchan)
 	exists, err := i.planetSrv.Exists(planet.Name)
 
 	if err != nil {
+		errchan <- planet
+
 		log.Print(err)
 		return err
 	}
 
 	if exists {
+		errchan <- planet
 		log.Print("planet already registered")
 		return nil
 	}
@@ -39,12 +43,14 @@ func (i service) Process(planet entity.Planet) error {
 	adapter, err := i.swapiSrv.GetPlanetExternally(planet.Name)
 
 	if err != nil {
+		errchan <- planet
 		log.Print(err)
 		return err
 	}
 
 	total, err := planet.TotalAppearances(adapter.Results)
 	if err != nil {
+		errchan <- planet
 		log.Print(err)
 		return err
 	}
@@ -54,6 +60,7 @@ func (i service) Process(planet entity.Planet) error {
 	err = i.planetSrv.Save(planet)
 
 	if err != nil {
+		errchan <- planet
 		log.Print(err)
 		return err
 	}

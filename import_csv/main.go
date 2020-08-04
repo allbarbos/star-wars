@@ -21,11 +21,19 @@ func loadEnv() {
 	}
 }
 
-func openCsv() *csv.Reader {
+func openCsv() *os.File {
 	csvfile, err := os.Open("seed.csv")
 	if err != nil {
 		log.Fatalln("couldn't open the csv file", err)
 	}
+
+	return csvfile
+}
+
+func main() {
+	loadEnv()
+
+	csvfile := openCsv()
 	defer csvfile.Close()
 
 	r := csv.NewReader(csvfile)
@@ -35,15 +43,8 @@ func openCsv() *csv.Reader {
     panic(err)
 	}
 
-	return r
-}
-
-func main() {
-	loadEnv()
-	csv := openCsv()
-
 	for {
-		record, err := csv.Read()
+		record, err := r.Read()
 		if err == io.EOF {
 			break
 		}
@@ -69,6 +70,14 @@ func main() {
 		p := planet.NewService(r)
 		s := swapi.New()
 		srv := importer.NewImporter(p, s)
-		srv.Process(newPlanet)
+
+		errchan := make(chan entity.Planet)
+
+		go srv.Process(newPlanet, errchan)
+
+		for p := range errchan {
+			log.Println(p)
+		}
+
 	}
 }
