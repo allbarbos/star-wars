@@ -8,72 +8,48 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestValid(t *testing.T) {
+// When all fields are filled
+func TestIsEmpty(t *testing.T) {
 	valid := Planet{
 		ID: "5f25e9782b148406adb55727",
 		Name: "Tatooine",
 		Climate: "arid",
 		Terrain: "desert",
-		TotalFilms: 5,
-	}.Valid()
+		TotalFilms: 1,
+	}.IsEmpty([]string{"ID", "Name", "Climate", "Terrain", "TotalFilms"})
 
-	assert.Equal(t, true, valid)
+	assert.Equal(t, false, valid)
 }
 
-func TestValid_FalseParallel(t *testing.T) {
-	testValidFalseID := func (t *testing.T) {
+// When a field is empty
+func TestIsEmptyFalseParallel(t *testing.T) {
+	testID := func (t *testing.T) {
 		valid := Planet{
 			ID: "",
 			Name: "Tatooine",
 			Climate: "arid",
 			Terrain: "desert",
-			TotalFilms: 0,
-		}.Valid()
+			TotalFilms: 5,
+		}.IsEmpty([]string{"ID"})
 
-		assert.Equal(t, false, valid)
+		assert.Equal(t, true, valid)
 	}
 
-	testValidFalseName := func (t *testing.T) {
-		valid := Planet{
-			ID: "5f25e9782b148406adb55727",
-			Name: "",
-			Climate: "arid",
-			Terrain: "desert",
-			TotalFilms: 0,
-		}.Valid()
-
-		assert.Equal(t, false, valid)
-	}
-
-	testValidFalseClimate := func (t *testing.T) {
-		valid := Planet{
-			ID: "5f25e9782b148406adb55727",
-			Name: "Tatooine",
-			Climate: "",
-			Terrain: "desert",
-			TotalFilms: 0,
-		}.Valid()
-
-		assert.Equal(t, false, valid)
-	}
-
-	testValidFalseTerrain := func (t *testing.T) {
+	testTotalFilms := func (t *testing.T) {
 		valid := Planet{
 			ID: "5f25e9782b148406adb55727",
 			Name: "Tatooine",
 			Climate: "arid",
-			Terrain: "",
+			Terrain: "desert",
 			TotalFilms: 0,
-		}.Valid()
+		}.IsEmpty([]string{"TotalFilms"})
 
-		assert.Equal(t, false, valid)
+		assert.Equal(t, true, valid)
 	}
 
 	t.Run("group", func(t *testing.T) {
-			t.Run("TestValid_FalseID", testValidFalseID)
-			t.Run("TestValid_FalseName", testValidFalseName)
-			t.Run("TestValid_FalseClimate", testValidFalseClimate)
-			t.Run("TestValid_FalseTerrain", testValidFalseTerrain)
+			t.Run("ID", testID)
+			t.Run("TotalFilms", testTotalFilms)
 	})
 }
 

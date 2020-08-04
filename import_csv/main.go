@@ -42,11 +42,17 @@ func main() {
 			log.Fatal(err)
 		}
 
-		// validar se existem os 3 valores
 		newPlanet := entity.Planet{
 			Name: record[0],
 			Climate: record[1],
 			Terrain: record[2],
+		}
+
+		empty := newPlanet.IsEmpty([]string{"Name", "Climate", "Terrain"})
+
+		if empty {
+			log.Printf("error: %s; %s; %s", record[0], record[1], record[2])
+			continue
 		}
 
 		d := db.New()

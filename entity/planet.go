@@ -2,6 +2,7 @@ package entity
 
 import (
 	"errors"
+	"reflect"
 	"star-wars/entity/adapter"
 )
 
@@ -14,24 +15,15 @@ type Planet struct {
 	TotalFilms int `json:"totalFilms" bson:"totalFilms,omitempty"`
 }
 
-func (p Planet) Valid() bool {
-	if p.ID == "" {
-		return false
+func (p Planet) IsEmpty(fields []string) bool {
+	for _, key := range fields {
+		value := reflect.ValueOf(p).FieldByName(key)
+		if value.Interface() == "" || value.Interface() == 0  {
+			return true
+		}
 	}
 
-	if p.Name == "" {
-		return false
-	}
-
-	if p.Climate == "" {
-		return false
-	}
-
-	if p.Terrain == "" {
-		return false
-	}
-
-	return true
+	return false
 }
 
 func (p Planet) TotalAppearances(adapter []adapter.Planet) (int, error) {

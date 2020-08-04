@@ -31,11 +31,11 @@ func (s srv) Exists(name string) (bool, error) {
 		return false, err
 	}
 
-	if planetDb.Valid() {
-		return true, nil
+	if planetDb.IsEmpty([]string{"ID"}) {
+		return false, nil
 	}
 
-	return false, nil
+	return true, nil
 }
 
 // Save planet
