@@ -1,0 +1,10 @@
+version: '3'
+services:
+  db:
+    image: mvertes/alpine-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - star-wars-api:/data/db
+volumes:
+  star-wars-api: {}

@@ -1,0 +1,145 @@
+openapi: 3.0.1
+info:
+  title: Star Wars
+  version: 1.0.0
+tags:
+- name: planets
+  description: All about the planets
+paths:
+  /planets:
+    get:
+      tags:
+      - planets
+      summary: List all planets
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Planets"
+        400:
+          description: Bad request
+          content: {}
+        404:
+          description: Not found
+          content: {}
+    post:
+      tags:
+      - planets
+      summary: Add a new planet
+      requestBody:
+        description: payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Planet"
+      responses:
+        200:
+          description: Ok
+          content: {}
+        400:
+          description: Bad request
+          content: {}
+
+  /planets/{id}:
+    get:
+      tags:
+      - planets
+      summary: List planet by id
+      parameters:
+      - name: id
+        in: path
+        description: Planet Name
+        example: "d52ad233-02d2-4899-b014-d9c6dac62e5a"
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Planet"
+        400:
+          description: Bad request
+          content: {}
+        404:
+          description: Not found
+          content: {}
+
+    delete:
+      tags:
+      - planets
+      summary: Delete planet
+      parameters:
+      - name: id
+        in: path
+        description: Planet Name
+        example: "d52ad233-02d2-4899-b014-d9c6dac62e5a"
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Ok
+          content: {}
+        400:
+          description: Bad request
+          content: {}
+        404:
+          description: Not found
+          content: {}
+
+  /planets/{name}:
+    get:
+      tags:
+      - planets
+      summary: List planet by name
+      parameters:
+      - name: name
+        in: path
+        description: Planet Name
+        example: "tatooine"
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Planet"
+        400:
+          description: Bad request
+          content: {}
+        404:
+          description: Not found
+          content: {}
+components:
+  schemas:
+    Planets:
+      type: array
+      items:
+        $ref: '#/components/schemas/Planet'
+    Planet:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          example: "d52ad233-02d2-4899-b014-d9c6dac62e5a"
+        name:
+          type: "string"
+          example: "Alderaan"
+        climate:
+          type: "string"
+          example: "temperate"
+        terrain:
+          type: "string"
+          example: "grasslands, mountains"
+        totalFilms:
+          type: integer
+          example: 5
