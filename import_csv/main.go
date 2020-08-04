@@ -14,12 +14,14 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func main() {
+func loadEnv() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+}
 
+func openCsv() *csv.Reader {
 	csvfile, err := os.Open("seed.csv")
 	if err != nil {
 		log.Fatalln("couldn't open the csv file", err)
@@ -33,8 +35,15 @@ func main() {
     panic(err)
 	}
 
+	return r
+}
+
+func main() {
+	loadEnv()
+	csv := openCsv()
+
 	for {
-		record, err := r.Read()
+		record, err := csv.Read()
 		if err == io.EOF {
 			break
 		}
