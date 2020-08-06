@@ -24,7 +24,7 @@ func TestProcess( t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	swapiMock := mock_swapi.NewMockService(ctrl)
-	planetMock := mock_planet.NewMockPlanetService(ctrl)
+	planetMock := mock_planet.NewMockService(ctrl)
 	adapter := adapter.Planets{
 		Results: []adapter.Planet{
 			{
@@ -49,7 +49,7 @@ func TestProcess_planet_registered( t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	swapiMock := mock_swapi.NewMockService(ctrl)
-	planetMock := mock_planet.NewMockPlanetService(ctrl)
+	planetMock := mock_planet.NewMockService(ctrl)
 	srv := NewImporter(planetMock, swapiMock)
 
 	planetMock.EXPECT().Exists("Tatooine").Return(true, nil)
@@ -65,7 +65,7 @@ func TestProcess_planet_save( t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	swapiMock := mock_swapi.NewMockService(ctrl)
-	planetMock := mock_planet.NewMockPlanetService(ctrl)
+	planetMock := mock_planet.NewMockService(ctrl)
 	adapter := adapter.Planets{
 		Results: []adapter.Planet{
 			{
@@ -89,7 +89,7 @@ func TestProcess_planet_error( t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	swapiMock := mock_swapi.NewMockService(ctrl)
-	planetMock := mock_planet.NewMockPlanetService(ctrl)
+	planetMock := mock_planet.NewMockService(ctrl)
 	planetMock.EXPECT().Exists("Tatooine").Return(false, errors.New("others errors"))
 
 	srv := NewImporter(planetMock, swapiMock)
@@ -104,7 +104,7 @@ func TestProcess_swapi_error( t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	swapiMock := mock_swapi.NewMockService(ctrl)
-	planetMock := mock_planet.NewMockPlanetService(ctrl)
+	planetMock := mock_planet.NewMockService(ctrl)
 
 	planetMock.EXPECT().Exists("Tatooine").Return(false, nil)
 	swapiMock.EXPECT().GetPlanetExternally("Tatooine").Return(adapter.Planets{}, errors.New("others errors"))
@@ -121,7 +121,7 @@ func TestProcess_total_appearances_error( t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	swapiMock := mock_swapi.NewMockService(ctrl)
-	planetMock := mock_planet.NewMockPlanetService(ctrl)
+	planetMock := mock_planet.NewMockService(ctrl)
 
 	planetMock.EXPECT().Exists("Tatooine").Return(false, nil)
 	swapiMock.EXPECT().GetPlanetExternally("Tatooine").Return(adapter.Planets{ Results: []adapter.Planet{} }, nil)

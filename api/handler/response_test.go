@@ -37,3 +37,13 @@ func TestResponseError_InternalServer(t *testing.T) {
 	assert.Equal(t, 500, w.Code)
 	assert.Equal(t, "{\"error\":\"internal server error\"}", w.Body.String())
 }
+
+func TestResponseError_NotFound(t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	ResponseError(NotFound{Message: "not found error"}, c)
+
+	assert.Equal(t, 404, w.Code)
+	assert.Equal(t, "{\"error\":\"not found error\"}", w.Body.String())
+}

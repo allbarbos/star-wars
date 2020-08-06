@@ -5,6 +5,7 @@ import (
 	"os"
 	"star-wars/api/controller"
 	"star-wars/health"
+	"star-wars/planet"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +22,7 @@ func Config() *gin.Engine {
 	// router.GET("/planets", indexBuilder())
 	// router.POST("/planets", shortenerBuilder())
 	// router.GET("/planets/:id", indexBuilder())
-	// router.GET("/planets/:name", indexBuilder())
+	router.GET("/planets/:name", planetsByNameBuilder())
 	// router.DELETE("/planets/:id", indexBuilder())
 
 	return router
@@ -43,4 +44,12 @@ func healthCheckBuilder() gin.HandlerFunc {
 	return controller.HealthCheckController{
 		DB: health.NewRepository(),
 	}.HealthCheck
+}
+
+func planetsByNameBuilder() gin.HandlerFunc {
+	r := planet.NewRepository()
+	s := planet.NewService(r)
+	return controller.PlanetsController{
+		Srv: s,
+	}.GetByName
 }

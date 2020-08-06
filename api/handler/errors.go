@@ -21,3 +21,13 @@ func (i InternalServer) Error() string {
 	log.Print(i.Message)
 	return "internal server error"
 }
+
+// NotFound HTTP 404
+type NotFound struct {
+	Status int
+	Message string
+}
+
+func (n NotFound) Error() string {
+	return n.Message
+}

@@ -29,7 +29,7 @@ func NewRepository() Repository {
 	name := os.Getenv("DB_NAME")
 	uri := os.Getenv("DB_HOST")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
 	options := options.Client().ApplyURI(uri)

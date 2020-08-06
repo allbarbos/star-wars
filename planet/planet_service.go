@@ -2,6 +2,7 @@ package planet
 
 import (
 	"log"
+	"star-wars/api/handler"
 	"star-wars/entity"
 )
 
@@ -9,6 +10,7 @@ import (
 type Service interface {
 	Exists(name string) (bool, error)
 	Save(planet entity.Planet) (error)
+	FindByName(name string) (entity.Planet, error)
 }
 
 type srv struct {
@@ -47,4 +49,23 @@ func (s srv) Save(planet entity.Planet) (error) {
 	}
 
 	return nil
+}
+
+// FindByName get planet
+func (s srv) FindByName(name string) (entity.Planet, error) {
+	planet, err := s.repo.FindByName(name)
+
+	if err != nil {
+		log.Print("planet service find by name: ", err.Error())
+
+		var newError error
+		if err.Error() == "mongo: no documents in result" {
+			newError = handler.NotFound{ Message: "planet not found" }
+		} else {
+			newError = handler.InternalServer{ Message: err.Error() }
+		}
+		return planet, newError
+	}
+
+	return planet, nil
 }

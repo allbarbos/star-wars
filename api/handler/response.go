@@ -3,7 +3,6 @@ package handler
 import (
 	"net/http"
 	"reflect"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,8 +19,13 @@ func ResponseError(err error, c *gin.Context) {
 	status := http.StatusInternalServerError
 	message := err.Error()
 
-	if strings.Contains(typeError, "BadRequest") {
+	switch typeError {
+	case "handler.BadRequest":
 		status = http.StatusBadRequest
+	case "handler.NotFound":
+		status = http.StatusNotFound
+	default:
+		status = http.StatusInternalServerError
 	}
 
 	c.JSON(status, gin.H{"error": message})
