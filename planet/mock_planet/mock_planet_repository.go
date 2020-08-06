@@ -61,3 +61,17 @@ func (mr *MockRepositoryMockRecorder) Save(planet interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockRepository)(nil).Save), planet)
 }
+
+// Ping mocks base method
+func (m *MockRepository) Ping() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Ping")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Ping indicates an expected call of Ping
+func (mr *MockRepositoryMockRecorder) Ping() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*MockRepository)(nil).Ping))
+}

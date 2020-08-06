@@ -1,7 +1,6 @@
 package planet
 
 import (
-	"log"
 	"star-wars/api/handler"
 	"star-wars/entity"
 )
@@ -44,7 +43,6 @@ func (s srv) Save(planet entity.Planet) (error) {
 	err := s.repo.Save(planet)
 
 	if err != nil {
-		log.Print(err)
 		return err
 	}
 
@@ -56,8 +54,6 @@ func (s srv) FindByName(name string) (entity.Planet, error) {
 	planet, err := s.repo.FindByName(name)
 
 	if err != nil {
-		log.Print("planet service find by name: ", err.Error())
-
 		var newError error
 		if err.Error() == "mongo: no documents in result" {
 			newError = handler.NotFound{ Message: "planet not found" }

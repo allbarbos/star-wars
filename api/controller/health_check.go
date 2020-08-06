@@ -2,14 +2,14 @@ package controller
 
 import (
 	"star-wars/entity"
-	"star-wars/health"
+	"star-wars/planet"
 
 	"github.com/gin-gonic/gin"
 )
 
 // HealthCheckController health of application
 type HealthCheckController struct {
-	DB health.Repository
+	DB planet.Repository
 }
 
 // HealthCheck returns application health

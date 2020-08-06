@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"os"
 	"star-wars/api/controller"
-	"star-wars/health"
 	"star-wars/planet"
 
 	"github.com/gin-gonic/gin"
@@ -42,7 +41,7 @@ func configCors(c *gin.Context) {
 
 func healthCheckBuilder() gin.HandlerFunc {
 	return controller.HealthCheckController{
-		DB: health.NewRepository(),
+		DB: planet.NewRepository(),
 	}.HealthCheck
 }
 

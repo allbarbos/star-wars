@@ -2,7 +2,7 @@ package controller
 
 import (
 	"net/http/httptest"
-	"star-wars/health/mock_health"
+	"star-wars/planet/mock_planet"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +15,7 @@ func TestHealthCheck( t *testing.T) {
 	c, _ := gin.CreateTestContext(w)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	dbMock := mock_health.NewMockRepository(ctrl)
+	dbMock := mock_planet.NewMockRepository(ctrl)
 	dbMock.EXPECT().Ping().Return("ok")
 
 	HealthCheckController{
@@ -31,7 +31,7 @@ func TestHealthCheck_Error( t *testing.T) {
 	c, _ := gin.CreateTestContext(w)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	dbMock := mock_health.NewMockRepository(ctrl)
+	dbMock := mock_planet.NewMockRepository(ctrl)
 	dbMock.EXPECT().Ping().Return("error")
 
 	HealthCheckController{
