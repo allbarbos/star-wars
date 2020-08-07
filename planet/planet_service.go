@@ -10,6 +10,7 @@ type Service interface {
 	Exists(name string) (bool, error)
 	Save(planet entity.Planet) (error)
 	FindByName(name string) (entity.Planet, error)
+	FindByID(id string) (entity.Planet, error)
 }
 
 type srv struct {
@@ -52,6 +53,23 @@ func (s srv) Save(planet entity.Planet) (error) {
 // FindByName get planet
 func (s srv) FindByName(name string) (entity.Planet, error) {
 	planet, err := s.repo.FindByName(name)
+
+	if err != nil {
+		var newError error
+		if err.Error() == "mongo: no documents in result" {
+			newError = handler.NotFound{ Message: "planet not found" }
+		} else {
+			newError = handler.InternalServer{ Message: err.Error() }
+		}
+		return planet, newError
+	}
+
+	return planet, nil
+}
+
+// FindByName get planet
+func (s srv) FindByID(id string) (entity.Planet, error) {
+	planet, err := s.repo.FindByID(id)
 
 	if err != nil {
 		var newError error

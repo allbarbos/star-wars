@@ -22,3 +22,15 @@ func (p PlanetsController) GetByName(c *gin.Context) {
 		handler.ResponseError(err, c)
 	}
 }
+
+// GetByID find
+func (p PlanetsController) GetByID(c *gin.Context) {
+	id := c.Param("id")
+	planet, err := p.Srv.FindByID(id)
+
+	if err == nil {
+		handler.ResponseSuccess(200, planet, c)
+	} else {
+		handler.ResponseError(err, c)
+	}
+}

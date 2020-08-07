@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -15,6 +16,7 @@ import (
 
 // Repository contract
 type Repository interface {
+	FindByID(id string) (entity.Planet, error)
 	FindByName(name string) (entity.Planet, error)
 	Save(planet entity.Planet) error
 	Ping() string
@@ -81,6 +83,39 @@ func (r repo) FindByName(name string) (entity.Planet, error) {
 
 	return planet, nil
 }
+
+func (r repo) FindByID(id string) (entity.Planet, error) {
+	planet := entity.Planet{}
+	_id, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		log.Print(err)
+		return planet, err
+	}
+
+	filter := bson.M{"_id": _id}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	cnx, db, err := db(ctx, r)
+
+	if err != nil {
+		log.Print(err)
+		return planet, err
+	}
+
+	err = db.FindOne(ctx, filter).Decode(&planet)
+	defer cnx.Disconnect(ctx)
+
+	if err != nil {
+		log.Print(err)
+		return planet, err
+	}
+
+	return planet, nil
+}
+
 
 func (r repo) Save(planet entity.Planet) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)

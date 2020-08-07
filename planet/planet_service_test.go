@@ -138,3 +138,52 @@ func TestFindByName_Error(t *testing.T) {
 
 	assert.Equal(t, "internal server error", err.Error())
 }
+
+func TestFindByID(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockRepo := mock_planet.NewMockRepository(ctrl)
+	defer ctrl.Finish()
+	expected := entity.Planet{
+		ID: "5f29e53f2939a742014a04af",
+		Name: "Tatooine",
+		Climate: "arid",
+		Terrain: "desert",
+		TotalFilms: 5,
+	}
+	mockRepo.EXPECT().FindByID("Tatooine").Return(expected, nil)
+
+	srv := NewService(mockRepo)
+	result, _ := srv.FindByID("Tatooine")
+
+	assert.Equal(t, expected, result)
+}
+
+func TestFindByID_NotFound(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockRepo := mock_planet.NewMockRepository(ctrl)
+	defer ctrl.Finish()
+	mockRepo.EXPECT().FindByID("Tatooine").Return(
+		entity.Planet{},
+		errors.New("mongo: no documents in result"),
+	)
+
+	srv := NewService(mockRepo)
+	_, err := srv.FindByID("Tatooine")
+
+	assert.Equal(t, "planet not found", err.Error())
+}
+
+func TestFindByID_Error(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockRepo := mock_planet.NewMockRepository(ctrl)
+	defer ctrl.Finish()
+	mockRepo.EXPECT().FindByID("Tatooine").Return(
+		entity.Planet{},
+		errors.New("other errors"),
+	)
+
+	srv := NewService(mockRepo)
+	_, err := srv.FindByID("Tatooine")
+
+	assert.Equal(t, "internal server error", err.Error())
+}

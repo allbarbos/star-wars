@@ -20,8 +20,8 @@ func Config() *gin.Engine {
 	router.GET("/health-check", healthCheckBuilder())
 	// router.GET("/planets", indexBuilder())
 	// router.POST("/planets", shortenerBuilder())
-	// router.GET("/planets/:id", indexBuilder())
-	router.GET("/planets/:name", planetsByNameBuilder())
+	router.GET("/planets/id/:id", planetsByIDBuilder())
+	router.GET("/planets/name/:name", planetsByNameBuilder())
 	// router.DELETE("/planets/:id", indexBuilder())
 
 	return router
@@ -51,4 +51,12 @@ func planetsByNameBuilder() gin.HandlerFunc {
 	return controller.PlanetsController{
 		Srv: s,
 	}.GetByName
+}
+
+func planetsByIDBuilder() gin.HandlerFunc {
+	r := planet.NewRepository()
+	s := planet.NewService(r)
+	return controller.PlanetsController{
+		Srv: s,
+	}.GetByID
 }
