@@ -7,13 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// HealthCheckController health of application
-type HealthCheckController struct {
+// HealthCheck controller
+type HealthCheck struct {
 	DB planet.Repository
 }
 
 // HealthCheck returns application health
-func (h HealthCheckController) HealthCheck(c *gin.Context) {
+func (h HealthCheck) HealthCheck(c *gin.Context) {
 	hc := entity.HealthCheck{
 		Status: "ok",
 		Dependencies: entity.Dependencies{

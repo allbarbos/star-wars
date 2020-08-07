@@ -62,6 +62,21 @@ func (mr *MockServiceMockRecorder) Save(planet interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockService)(nil).Save), planet)
 }
 
+// FindAll mocks base method
+func (m *MockService) FindAll(limit, skip int64) ([]entity.Planet, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindAll", limit, skip)
+	ret0, _ := ret[0].([]entity.Planet)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindAll indicates an expected call of FindAll
+func (mr *MockServiceMockRecorder) FindAll(limit, skip interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockService)(nil).FindAll), limit, skip)
+}
+
 // FindByName mocks base method
 func (m *MockService) FindByName(name string) (entity.Planet, error) {
 	m.ctrl.T.Helper()

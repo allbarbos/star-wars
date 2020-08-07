@@ -1,7 +1,6 @@
 package api
 
 import (
-	"net/http"
 	"os"
 	"star-wars/api/controller"
 	"star-wars/planet"
@@ -15,40 +14,27 @@ func Config() *gin.Engine {
 	}
 
 	router := gin.Default()
-	router.Use(configCors)
 
 	router.GET("/health-check", healthCtrl().HealthCheck)
-	router.GET("/planets/id/:id", planetsCtrl().GetByID)
-	router.GET("/planets/name/:name", planetsCtrl().GetByName)
+	router.GET("/planets", planetsCtrl().All)
+	router.GET("/planets/id/:id", planetsCtrl().ByID)
+	router.GET("/planets/name/:name", planetsCtrl().ByName)
 	router.DELETE("/planets/:id", planetsCtrl().Delete)
-	// router.GET("/planets", indexBuilder())
 	// router.POST("/planets", shortenerBuilder())
 
 	return router
 }
 
-func configCors(c *gin.Context) {
-	c.Header("Access-Control-Allow-Origin", "*")
-	c.Header("Access-Control-Allow-Methods", "*")
-	c.Header("Access-Control-Allow-Headers", "*")
-	c.Header("Content-Type", "application/json")
-	if c.Request.Method != "OPTIONS" {
-		c.Next()
-	} else {
-		c.AbortWithStatus(http.StatusOK)
-	}
-}
-
-func healthCtrl() controller.HealthCheckController {
-	return controller.HealthCheckController{
+func healthCtrl() controller.HealthCheck {
+	return controller.HealthCheck{
 		DB: planet.NewRepository(),
 	}
 }
 
-func planetsCtrl() controller.PlanetsController {
+func planetsCtrl() controller.Planets {
 	r := planet.NewRepository()
 	s := planet.NewService(r)
-	return controller.PlanetsController{
+	return controller.Planets{
 		Srv: s,
 	}
 }

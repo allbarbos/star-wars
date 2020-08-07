@@ -18,7 +18,7 @@ func TestHealthCheck( t *testing.T) {
 	dbMock := mock_planet.NewMockRepository(ctrl)
 	dbMock.EXPECT().Ping().Return("ok")
 
-	HealthCheckController{
+	HealthCheck{
 		DB: dbMock,
 	}.HealthCheck(c)
 
@@ -34,7 +34,7 @@ func TestHealthCheck_Error( t *testing.T) {
 	dbMock := mock_planet.NewMockRepository(ctrl)
 	dbMock.EXPECT().Ping().Return("error")
 
-	HealthCheckController{
+	HealthCheck{
 		DB: dbMock,
 	}.HealthCheck(c)
 

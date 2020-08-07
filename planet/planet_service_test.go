@@ -212,3 +212,61 @@ func TestDelete_Error(t *testing.T) {
 
 	assert.Equal(t, "internal server error", err.Error())
 }
+
+func TestFindAll(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockRepo := mock_planet.NewMockRepository(ctrl)
+	defer ctrl.Finish()
+
+	var limit, skip int64
+	limit = 3
+	skip = 0
+
+	expected := []entity.Planet{
+		{
+			ID: "5f2c891e9a9e070b1ef2e28c",
+			Name: "Alderaan",
+			Climate: "temperate",
+			Terrain: "grasslands, mountains",
+			TotalFilms: 2,
+		},
+		{
+			ID: "5f2c891e9a9e070b1ef2e28d",
+			Name: "Tatooine",
+			Climate: "arid",
+			Terrain: "desert",
+			TotalFilms: 5,
+		},
+		{
+			ID: "5f2c891e9a9e070b1ef2e28e",
+			Name: "Yavin IV",
+			Climate: "temperate, tropical",
+			Terrain: "jungle, rainforests",
+			TotalFilms: 1,
+		},
+	}
+
+	mockRepo.EXPECT().FindAll(limit, skip).Return(expected,nil)
+
+	srv := NewService(mockRepo)
+	result, _ := srv.FindAll(3, 0)
+
+	assert.Equal(t, expected, result)
+}
+
+func TestFindAll_Error(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockRepo := mock_planet.NewMockRepository(ctrl)
+	defer ctrl.Finish()
+
+	var limit, skip int64
+	limit = 3
+	skip = 0
+
+	mockRepo.EXPECT().FindAll(limit, skip).Return([]entity.Planet{}, errors.New("error"))
+
+	srv := NewService(mockRepo)
+	_, err := srv.FindAll(3, 0)
+
+	assert.Equal(t, handler.InternalServer{Message:"error"}, err)
+}

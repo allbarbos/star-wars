@@ -9,6 +9,7 @@ import (
 type Service interface {
 	Exists(name string) (bool, error)
 	Save(planet entity.Planet) (error)
+	FindAll(limit int64, skip int64) ([]entity.Planet, error)
 	FindByName(name string) (entity.Planet, error)
 	FindByID(id string) (entity.Planet, error)
 	Delete(id string) error
@@ -85,9 +86,19 @@ func (s srv) FindByID(id string) (entity.Planet, error) {
 	return planet, nil
 }
 
+// Delete planet
 func (s srv) Delete(id string) error {
 	if err := s.repo.Delete(id); err != nil {
 		return handler.InternalServer{ Message: err.Error() }
 	}
 	return nil
+}
+
+// FindAll get planets
+func (s srv) FindAll(limit int64, skip int64) ([]entity.Planet, error) {
+	planets, err := s.repo.FindAll(limit, skip)
+	if err != nil {
+		return planets, handler.InternalServer{ Message: err.Error() }
+	}
+	return planets, nil
 }

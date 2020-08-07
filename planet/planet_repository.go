@@ -17,6 +17,7 @@ import (
 // Repository contract
 type Repository interface {
 	Ping() string
+	FindAll(limit int64, skip int64) ([]entity.Planet, error)
 	FindByID(id string) (entity.Planet, error)
 	FindByName(name string) (entity.Planet, error)
 	Save(planet entity.Planet) error
@@ -168,4 +169,38 @@ func (r repo) Delete(id string) error{
 	}
 
 	return nil
+}
+
+func (r repo) FindAll(limit int64, skip int64) ([]entity.Planet, error) {
+	var planets []entity.Planet
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	cnx, db, err := db(ctx, r)
+
+	if err != nil {
+		log.Print(err)
+		return planets, err
+	}
+
+	opt := options.Find()
+	opt.SetLimit(limit)
+	opt.SetSkip(skip)
+
+	cr, err := db.Find(ctx, bson.D{}, opt)
+	defer cnx.Disconnect(ctx)
+
+	if err != nil {
+		log.Print(err)
+		return planets, err
+	}
+
+	err = cr.All(ctx, &planets)
+
+	if err != nil {
+		log.Print(err)
+		return planets, err
+	}
+
+	return planets, nil
 }

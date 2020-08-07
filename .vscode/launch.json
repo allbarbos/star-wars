@@ -10,7 +10,7 @@
       "request": "launch",
       "mode": "auto",
       // "program": "${fileDirname}",
-      "program": "${workspaceFolder}/import_csv/main.go",
+      "program": "${workspaceFolder}/importer/cmd/main.go",
       "env": {},
       "args": []
     },
@@ -20,7 +20,7 @@
       "request": "launch",
       "mode": "auto",
       // "program": "${fileDirname}",
-      "program": "${workspaceFolder}/api/main.go",
+      "program": "${workspaceFolder}/api/cmd/main.go",
       "env": {},
       "args": []
     }

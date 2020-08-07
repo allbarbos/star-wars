@@ -47,6 +47,21 @@ func (mr *MockRepositoryMockRecorder) Ping() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*MockRepository)(nil).Ping))
 }
 
+// FindAll mocks base method
+func (m *MockRepository) FindAll(limit, skip int64) ([]entity.Planet, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindAll", limit, skip)
+	ret0, _ := ret[0].([]entity.Planet)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindAll indicates an expected call of FindAll
+func (mr *MockRepositoryMockRecorder) FindAll(limit, skip interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockRepository)(nil).FindAll), limit, skip)
+}
+
 // FindByID mocks base method
 func (m *MockRepository) FindByID(id string) (entity.Planet, error) {
 	m.ctrl.T.Helper()

@@ -3,16 +3,52 @@ package controller
 import (
 	"star-wars/api/handler"
 	"star-wars/planet"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-type PlanetsController struct {
+// Planets controller
+type Planets struct {
 	Srv planet.Service
 }
 
-// GetByName find
-func (p PlanetsController) GetByName(c *gin.Context) {
+// All get planets
+func (p Planets) All(c *gin.Context) {
+	limit, err :=  strconv.ParseInt(c.DefaultQuery("limit", "3"), 10, 64)
+	if err != nil {
+		handler.ResponseError(
+			handler.BadRequest{
+				Message: "limit is invalid",
+			},
+			c,
+		)
+		return
+	}
+
+	skip, err := strconv.ParseInt(c.DefaultQuery("skip", "0"), 10, 64)
+	if err != nil {
+		handler.ResponseError(
+				handler.BadRequest{
+				Message: "skip is invalid",
+			},
+			c,
+		)
+		return
+	}
+
+	planets, err := p.Srv.FindAll(limit, skip)
+
+	if err != nil {
+		handler.ResponseError(err, c)
+		return
+	}
+
+	handler.ResponseSuccess(200, planets, c)
+}
+
+// ByName get planet
+func (p Planets) ByName(c *gin.Context) {
 	name := c.Param("name")
 	planet, err := p.Srv.FindByName(name)
 
@@ -23,8 +59,8 @@ func (p PlanetsController) GetByName(c *gin.Context) {
 	}
 }
 
-// GetByID find
-func (p PlanetsController) GetByID(c *gin.Context) {
+// ByID get planet
+func (p Planets) ByID(c *gin.Context) {
 	id := c.Param("id")
 	planet, err := p.Srv.FindByID(id)
 
@@ -36,7 +72,7 @@ func (p PlanetsController) GetByID(c *gin.Context) {
 }
 
 // Delete planet
-func (p PlanetsController) Delete(c *gin.Context) {
+func (p Planets) Delete(c *gin.Context) {
 	id := c.Param("id")
 	err := p.Srv.Delete(id)
 
