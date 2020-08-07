@@ -1,4 +1,4 @@
-package routes
+package api
 
 import (
 	"net/http"
@@ -17,10 +17,10 @@ func Config() *gin.Engine {
 	router := gin.Default()
 	router.Use(configCors)
 
-	router.GET("/health-check", healthCheckBuilder())
-	router.GET("/planets/id/:id", planetsByID())
-	router.GET("/planets/name/:name", planetsByName())
-	router.DELETE("/planets/:id", planetsDel())
+	router.GET("/health-check", healthCtrl().HealthCheck)
+	router.GET("/planets/id/:id", planetsCtrl().GetByID)
+	router.GET("/planets/name/:name", planetsCtrl().GetByName)
+	router.DELETE("/planets/:id", planetsCtrl().Delete)
 	// router.GET("/planets", indexBuilder())
 	// router.POST("/planets", shortenerBuilder())
 
@@ -39,32 +39,16 @@ func configCors(c *gin.Context) {
 	}
 }
 
-func healthCheckBuilder() gin.HandlerFunc {
+func healthCtrl() controller.HealthCheckController {
 	return controller.HealthCheckController{
 		DB: planet.NewRepository(),
-	}.HealthCheck
+	}
 }
 
-func planetsByName() gin.HandlerFunc {
+func planetsCtrl() controller.PlanetsController {
 	r := planet.NewRepository()
 	s := planet.NewService(r)
 	return controller.PlanetsController{
 		Srv: s,
-	}.GetByName
-}
-
-func planetsByID() gin.HandlerFunc {
-	r := planet.NewRepository()
-	s := planet.NewService(r)
-	return controller.PlanetsController{
-		Srv: s,
-	}.GetByID
-}
-
-func planetsDel() gin.HandlerFunc {
-	r := planet.NewRepository()
-	s := planet.NewService(r)
-	return controller.PlanetsController{
-		Srv: s,
-	}.Delete
+	}
 }

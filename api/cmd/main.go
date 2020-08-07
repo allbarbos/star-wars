@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"star-wars/api/routes"
+	"star-wars/api"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -23,7 +23,7 @@ func main() {
 
 	s := &http.Server{
 		Addr:           port,
-		Handler:        routes.Config(),
+		Handler:        api.Config(),
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
