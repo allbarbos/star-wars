@@ -18,6 +18,15 @@ func TestResponseSuccess(t *testing.T) {
 	assert.Equal(t, "\"ok\"", w.Body.String())
 }
 
+func TestResponseSuccess_EmptyBody(t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	ResponseSuccess(200, nil, c)
+
+	assert.Equal(t, 200, w.Code)
+}
+
 func TestResponseError_BadRequest(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)

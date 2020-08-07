@@ -16,10 +16,11 @@ import (
 
 // Repository contract
 type Repository interface {
+	Ping() string
 	FindByID(id string) (entity.Planet, error)
 	FindByName(name string) (entity.Planet, error)
 	Save(planet entity.Planet) error
-	Ping() string
+	Delete(id string) error
 }
 
 type repo struct {
@@ -116,7 +117,6 @@ func (r repo) FindByID(id string) (entity.Planet, error) {
 	return planet, nil
 }
 
-
 func (r repo) Save(planet entity.Planet) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
@@ -129,6 +129,37 @@ func (r repo) Save(planet entity.Planet) error {
 	}
 
 	_, err = db.InsertOne(ctx, planet)
+	defer cnx.Disconnect(ctx)
+
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	return nil
+}
+
+func (r repo) Delete(id string) error{
+	_id, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	filter := bson.M{"_id": _id}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	cnx, db, err := db(ctx, r)
+
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	_, err = db.DeleteOne(ctx, filter)
 	defer cnx.Disconnect(ctx)
 
 	if err != nil {

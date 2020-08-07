@@ -11,6 +11,7 @@ type Service interface {
 	Save(planet entity.Planet) (error)
 	FindByName(name string) (entity.Planet, error)
 	FindByID(id string) (entity.Planet, error)
+	Delete(id string) error
 }
 
 type srv struct {
@@ -82,4 +83,11 @@ func (s srv) FindByID(id string) (entity.Planet, error) {
 	}
 
 	return planet, nil
+}
+
+func (s srv) Delete(id string) error {
+	if err := s.repo.Delete(id); err != nil {
+		return handler.InternalServer{ Message: err.Error() }
+	}
+	return nil
 }

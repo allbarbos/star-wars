@@ -2,6 +2,7 @@ package planet
 
 import (
 	"errors"
+	"star-wars/api/handler"
 	"star-wars/entity"
 	"star-wars/planet/mock_planet"
 	"testing"
@@ -184,6 +185,30 @@ func TestFindByID_Error(t *testing.T) {
 
 	srv := NewService(mockRepo)
 	_, err := srv.FindByID("Tatooine")
+
+	assert.Equal(t, "internal server error", err.Error())
+}
+
+func TestDelete(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockRepo := mock_planet.NewMockRepository(ctrl)
+	defer ctrl.Finish()
+	mockRepo.EXPECT().Delete("5f2c88567563c4bae600d7df").Return(nil)
+
+	srv := NewService(mockRepo)
+	err := srv.Delete("5f2c88567563c4bae600d7df")
+
+	assert.Equal(t, nil, err)
+}
+
+func TestDelete_Error(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockRepo := mock_planet.NewMockRepository(ctrl)
+	defer ctrl.Finish()
+	mockRepo.EXPECT().Delete("5f2c88567563c4bae600d7df").Return(handler.InternalServer{ Message: "error" })
+
+	srv := NewService(mockRepo)
+	err := srv.Delete("5f2c88567563c4bae600d7df")
 
 	assert.Equal(t, "internal server error", err.Error())
 }

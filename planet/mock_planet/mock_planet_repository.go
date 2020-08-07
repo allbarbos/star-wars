@@ -33,6 +33,20 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
+// Ping mocks base method
+func (m *MockRepository) Ping() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Ping")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Ping indicates an expected call of Ping
+func (mr *MockRepositoryMockRecorder) Ping() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*MockRepository)(nil).Ping))
+}
+
 // FindByID mocks base method
 func (m *MockRepository) FindByID(id string) (entity.Planet, error) {
 	m.ctrl.T.Helper()
@@ -77,16 +91,16 @@ func (mr *MockRepositoryMockRecorder) Save(planet interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockRepository)(nil).Save), planet)
 }
 
-// Ping mocks base method
-func (m *MockRepository) Ping() string {
+// Delete mocks base method
+func (m *MockRepository) Delete(id string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Ping")
-	ret0, _ := ret[0].(string)
+	ret := m.ctrl.Call(m, "Delete", id)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Ping indicates an expected call of Ping
-func (mr *MockRepositoryMockRecorder) Ping() *gomock.Call {
+// Delete indicates an expected call of Delete
+func (mr *MockRepositoryMockRecorder) Delete(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*MockRepository)(nil).Ping))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockRepository)(nil).Delete), id)
 }

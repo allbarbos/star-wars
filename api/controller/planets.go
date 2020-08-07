@@ -34,3 +34,15 @@ func (p PlanetsController) GetByID(c *gin.Context) {
 		handler.ResponseError(err, c)
 	}
 }
+
+// Delete planet
+func (p PlanetsController) Delete(c *gin.Context) {
+	id := c.Param("id")
+	err := p.Srv.Delete(id)
+
+	if err == nil {
+		handler.ResponseSuccess(200, nil, c)
+	} else {
+		handler.ResponseError(err, c)
+	}
+}

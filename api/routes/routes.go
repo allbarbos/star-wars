@@ -18,11 +18,11 @@ func Config() *gin.Engine {
 	router.Use(configCors)
 
 	router.GET("/health-check", healthCheckBuilder())
+	router.GET("/planets/id/:id", planetsByID())
+	router.GET("/planets/name/:name", planetsByName())
+	router.DELETE("/planets/:id", planetsDel())
 	// router.GET("/planets", indexBuilder())
 	// router.POST("/planets", shortenerBuilder())
-	router.GET("/planets/id/:id", planetsByIDBuilder())
-	router.GET("/planets/name/:name", planetsByNameBuilder())
-	// router.DELETE("/planets/:id", indexBuilder())
 
 	return router
 }
@@ -45,7 +45,7 @@ func healthCheckBuilder() gin.HandlerFunc {
 	}.HealthCheck
 }
 
-func planetsByNameBuilder() gin.HandlerFunc {
+func planetsByName() gin.HandlerFunc {
 	r := planet.NewRepository()
 	s := planet.NewService(r)
 	return controller.PlanetsController{
@@ -53,10 +53,18 @@ func planetsByNameBuilder() gin.HandlerFunc {
 	}.GetByName
 }
 
-func planetsByIDBuilder() gin.HandlerFunc {
+func planetsByID() gin.HandlerFunc {
 	r := planet.NewRepository()
 	s := planet.NewService(r)
 	return controller.PlanetsController{
 		Srv: s,
 	}.GetByID
+}
+
+func planetsDel() gin.HandlerFunc {
+	r := planet.NewRepository()
+	s := planet.NewService(r)
+	return controller.PlanetsController{
+		Srv: s,
+	}.Delete
 }

@@ -111,3 +111,38 @@ func TestGetByID_Error( t *testing.T) {
 	assert.Equal(t, 404, w.Code)
 	assert.Equal(t, `{"error":"planet not found"}`, w.Body.String())
 }
+
+func TestDelete( t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	pathParam := gin.Param{Key: "id", Value: "5f29e53f2939a742014a04af"}
+	c.Params = []gin.Param{pathParam}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	srvMock := mock_planet.NewMockService(ctrl)
+	srvMock.EXPECT().Delete("5f29e53f2939a742014a04af").Return(nil)
+
+	PlanetsController{
+		Srv: srvMock,
+	}.Delete(c)
+
+	assert.Equal(t, 200, w.Code)
+}
+
+func TestDelete_Error( t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	pathParam := gin.Param{Key: "id", Value: "5f29e53f2939a742014a04af"}
+	c.Params = []gin.Param{pathParam}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	srvMock := mock_planet.NewMockService(ctrl)
+	srvMock.EXPECT().Delete("5f29e53f2939a742014a04af").Return(handler.InternalServer{ Message: "error" })
+
+	PlanetsController{
+		Srv: srvMock,
+	}.Delete(c)
+
+	assert.Equal(t, 500, w.Code)
+	assert.Equal(t, `{"error":"internal server error"}`, w.Body.String())
+}

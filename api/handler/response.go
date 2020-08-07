@@ -10,7 +10,11 @@ import (
 // ResponseSuccess creates payload
 func ResponseSuccess(status int, body interface{}, c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
-	c.JSON(status, body)
+	if body != nil {
+		c.JSON(status, body)
+	} else {
+		c.Writer.WriteHeader(http.StatusOK)
+	}
 }
 
 // ResponseError creates payload
