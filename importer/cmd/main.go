@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -29,21 +30,20 @@ func openCsv() *os.File {
 	return csvfile
 }
 
-func main() {
-	loadEnv()
+func readCsv(file *os.File) []entity.Planet {
+	defer file.Close()
 
-	csvfile := openCsv()
-	defer csvfile.Close()
-
-	r := csv.NewReader(csvfile)
+	r := csv.NewReader(file)
 	r.Comma = ';'
 
 	if _, err := r.Read(); err != nil {
     panic(err)
 	}
 
+	var planets []entity.Planet
+
 	for {
-		record, err := r.Read()
+		rec, err := r.Read()
 		if err == io.EOF {
 			break
 		}
@@ -52,29 +52,40 @@ func main() {
 		}
 
 		newPlanet := entity.Planet{
-			Name: record[0],
-			Climate: record[1],
-			Terrain: record[2],
+			Name: rec[0],
+			Climate: rec[1],
+			Terrain: rec[2],
 		}
 
 		empty := newPlanet.IsEmpty([]string{"Name", "Climate", "Terrain"})
 
 		if empty {
-			log.Printf("error: %s; %s; %s", record[0], record[1], record[2])
+			log.Printf("row error: %s; %s; %s", rec[0], rec[1], rec[2])
 			continue
 		}
 
-		r := planet.NewRepository()
-		p := planet.NewService(r)
-		s := swapi.New()
-		srv := importer.NewImporter(p, s)
-
-		errchan := make(chan string)
-
-		go srv.Process(newPlanet, errchan)
-
-		for e := range errchan {
-			log.Print(e)
-		}
+		planets = append(planets, newPlanet)
 	}
+
+	return planets
+}
+
+func main() {
+	loadEnv()
+
+	csvfile := openCsv()
+	planets := readCsv(csvfile)
+
+	s := swapi.New()
+	r := planet.NewRepository()
+	p := planet.NewService(r, s)
+	srv := importer.NewImporter(p, s)
+
+	errors := srv.Import(planets)
+
+	for _, err := range errors {
+		log.Print(err)
+	}
+
+	fmt.Println("> completed - errors:", len(errors))
 }
