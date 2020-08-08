@@ -1,22 +1,27 @@
-# Star Wars API
+# Star Wars
 
-### Requisitos:
-- Para cada planeta, os seguintes dados devem ser obtidos do banco de dados da aplicação, sendo inserido manualmente:
-```
-Nome
-Clima
-Terreno
-```
+#### Requisitos:
+- Para cada planeta, os dados (`Nome, Clima, Terreno`) devem ser obtidos do banco de dados da aplicação, sendo inserido manualmente
 - Para cada planeta também devemos ter a quantidade de aparições em filmes, que podem ser obtidas pela API pública do Star Wars: https://swapi.dev/about
 
-### Funcionalidades:
-- Adicionar um planeta (com nome, clima e terreno)
+#### Funcionalidades:
 - Listar planetas
 - Buscar por nome
 - Buscar por ID
+- Adicionar um planeta com nome, clima e terreno
 - Remover planeta
 
-### Data
+## Projeto  
+
+#### Importer  
+Responsável pelo cadastro manual, onde seu input é um arquivo CSV no formato `name;climate;terrain`  
+**path:** `importer/cmd/main.go`
+
+#### API  
+Ponto de entrada para integração externa  
+**path:** `api/cmd/main.go`
+
+#### Data schema
 ```
 Planet {
   id,         // d52ad233-02d2-4899-b014-d9c6dac62e5a
