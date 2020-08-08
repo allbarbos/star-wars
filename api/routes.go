@@ -4,6 +4,7 @@ import (
 	"os"
 	"star-wars/api/controller"
 	"star-wars/planet"
+	"star-wars/swapi"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,7 +21,7 @@ func Config() *gin.Engine {
 	router.GET("/planets/id/:id", planetsCtrl().ByID)
 	router.GET("/planets/name/:name", planetsCtrl().ByName)
 	router.DELETE("/planets/:id", planetsCtrl().Delete)
-	// router.POST("/planets", shortenerBuilder())
+	router.POST("/planets", planetsCtrl().Post)
 
 	return router
 }
@@ -32,8 +33,9 @@ func healthCtrl() controller.HealthCheck {
 }
 
 func planetsCtrl() controller.Planets {
+	sw := swapi.New()
 	r := planet.NewRepository()
-	s := planet.NewService(r)
+	s := planet.NewService(r, sw)
 	return controller.Planets{
 		Srv: s,
 	}

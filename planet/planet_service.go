@@ -3,12 +3,13 @@ package planet
 import (
 	"star-wars/api/handler"
 	"star-wars/entity"
+	"star-wars/swapi"
 )
 
 // Service contract
 type Service interface {
 	Exists(name string) (bool, error)
-	Save(planet entity.Planet) (error)
+	Save(planet *entity.Planet) error
 	FindAll(limit int64, skip int64) ([]entity.Planet, error)
 	FindByName(name string) (entity.Planet, error)
 	FindByID(id string) (entity.Planet, error)
@@ -17,12 +18,14 @@ type Service interface {
 
 type srv struct {
 	repo Repository
+	swapi swapi.Service
 }
 
 // NewService returns a planet service instance
-func NewService(r Repository) Service {
+func NewService(r Repository, s swapi.Service) Service {
 	return &srv{
 		repo: r,
+		swapi: s,
 	}
 }
 
@@ -39,17 +42,6 @@ func (s srv) Exists(name string) (bool, error) {
 	}
 
 	return true, nil
-}
-
-// Save planet
-func (s srv) Save(planet entity.Planet) (error) {
-	err := s.repo.Save(planet)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // FindByName get planet
@@ -101,4 +93,44 @@ func (s srv) FindAll(limit int64, skip int64) ([]entity.Planet, error) {
 		return planets, handler.InternalServer{ Message: err.Error() }
 	}
 	return planets, nil
+}
+
+// Save planet
+func (s srv) Save(planet *entity.Planet) error {
+	name := planet.Name
+	exists, err :=  s.Exists(name)
+
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		err := handler.BadRequest{Message: "planet already registered"}
+		return err
+	}
+
+	adapter, err := s.swapi.GetPlanet(planet.Name)
+
+	if err != nil {
+		return handler.InternalServer{Message: err.Error()}
+	}
+
+	if adapter.Count == 0 {
+		return handler.BadRequest{Message: "non-existent planet"}
+	}
+
+	total, err := planet.TotalAppearances(adapter.Results)
+	if err != nil {
+		return err
+	}
+
+	planet.TotalFilms = total
+
+	err = s.repo.Save(planet)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

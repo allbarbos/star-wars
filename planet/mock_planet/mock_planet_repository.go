@@ -93,7 +93,7 @@ func (mr *MockRepositoryMockRecorder) FindByName(name interface{}) *gomock.Call 
 }
 
 // Save mocks base method
-func (m *MockRepository) Save(planet entity.Planet) error {
+func (m *MockRepository) Save(planet *entity.Planet) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Save", planet)
 	ret0, _ := ret[0].(error)

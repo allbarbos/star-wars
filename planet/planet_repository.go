@@ -20,7 +20,7 @@ type Repository interface {
 	FindAll(limit int64, skip int64) ([]entity.Planet, error)
 	FindByID(id string) (entity.Planet, error)
 	FindByName(name string) (entity.Planet, error)
-	Save(planet entity.Planet) error
+	Save(planet *entity.Planet) error
 	Delete(id string) error
 }
 
@@ -49,9 +49,9 @@ func (r repo) Ping() string {
 	defer cancel()
 
 	cnx, _, err := db(ctx, r)
+	defer cnx.Disconnect(ctx)
 
 	err = cnx.Ping(ctx, readpref.Primary())
-	defer cnx.Disconnect(ctx)
 
 	if err != nil {
 		log.Print(err)
@@ -69,17 +69,15 @@ func (r repo) FindByName(name string) (entity.Planet, error) {
 	defer cancel()
 
 	cnx, db, err := db(ctx, r)
+	defer cnx.Disconnect(ctx)
 
 	if err != nil {
-		log.Print(err)
 		return planet, err
 	}
 
 	err = db.FindOne(ctx, filter).Decode(&planet)
-	defer cnx.Disconnect(ctx)
 
 	if err != nil {
-		log.Print(err)
 		return planet, err
 	}
 
@@ -101,6 +99,7 @@ func (r repo) FindByID(id string) (entity.Planet, error) {
 	defer cancel()
 
 	cnx, db, err := db(ctx, r)
+	defer cnx.Disconnect(ctx)
 
 	if err != nil {
 		log.Print(err)
@@ -108,7 +107,6 @@ func (r repo) FindByID(id string) (entity.Planet, error) {
 	}
 
 	err = db.FindOne(ctx, filter).Decode(&planet)
-	defer cnx.Disconnect(ctx)
 
 	if err != nil {
 		log.Print(err)
@@ -118,24 +116,27 @@ func (r repo) FindByID(id string) (entity.Planet, error) {
 	return planet, nil
 }
 
-func (r repo) Save(planet entity.Planet) error {
+func (r repo) Save(planet *entity.Planet) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
 	cnx, db, err := db(ctx, r)
-
-	if err != nil {
-		log.Print(err)
-		return err
-	}
-
-	_, err = db.InsertOne(ctx, planet)
 	defer cnx.Disconnect(ctx)
 
 	if err != nil {
 		log.Print(err)
 		return err
 	}
+
+	result, err := db.InsertOne(ctx, &planet)
+
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	oid, _ := result.InsertedID.(primitive.ObjectID);
+	planet.ID = oid.Hex()
 
 	return nil
 }
@@ -177,6 +178,7 @@ func (r repo) FindAll(limit int64, skip int64) ([]entity.Planet, error) {
 	defer cancel()
 
 	cnx, db, err := db(ctx, r)
+	defer cnx.Disconnect(ctx)
 
 	if err != nil {
 		log.Print(err)
@@ -188,7 +190,6 @@ func (r repo) FindAll(limit int64, skip int64) ([]entity.Planet, error) {
 	opt.SetSkip(skip)
 
 	cr, err := db.Find(ctx, bson.D{}, opt)
-	defer cnx.Disconnect(ctx)
 
 	if err != nil {
 		log.Print(err)

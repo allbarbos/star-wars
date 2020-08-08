@@ -11,7 +11,7 @@ import (
 
 // Service contract
 type Service interface {
-	GetPlanetExternally(name string) (adapter.Planets, error)
+	GetPlanet(name string) (adapter.Planets, error)
 }
 
 type swapi struct {}
@@ -21,7 +21,7 @@ func New() Service {
 	return &swapi{}
 }
 
-func (s swapi) GetPlanetExternally(name string) (adapter.Planets, error) {
+func (s swapi) GetPlanet(name string) (adapter.Planets, error) {
 	var adapter adapter.Planets
 
 	resp, err := http.Get(os.Getenv("SWAPI_URL") + "/planets/?search=" + url.QueryEscape(name))
@@ -32,5 +32,6 @@ func (s swapi) GetPlanetExternally(name string) (adapter.Planets, error) {
 	}
 
 	json.NewDecoder(resp.Body).Decode(&adapter)
+
 	return adapter, nil
 }

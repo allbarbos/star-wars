@@ -2,6 +2,7 @@ package controller
 
 import (
 	"star-wars/api/handler"
+	"star-wars/entity"
 	"star-wars/planet"
 	"strconv"
 
@@ -81,4 +82,39 @@ func (p Planets) Delete(c *gin.Context) {
 	} else {
 		handler.ResponseError(err, c)
 	}
+}
+
+// Post save planet
+func (p Planets) Post(c *gin.Context) {
+	var planet entity.Planet
+	err := c.BindJSON(&planet)
+
+	if err != nil {
+		handler.ResponseError(
+			handler.BadRequest{
+				Message: "body is invalid",
+			},
+			c,
+		)
+		return
+	}
+
+	if planet.IsEmpty([]string{"Name", "Climate", "Terrain"}) {
+		handler.ResponseError(
+			handler.BadRequest{
+				Message: "name, climate and terrain is required",
+			},
+			c,
+		)
+		return
+	}
+
+	err = p.Srv.Save(&planet)
+
+	if err != nil {
+		handler.ResponseError(err, c)
+		return
+	}
+
+	handler.ResponseSuccess(201, planet, c)
 }

@@ -49,7 +49,7 @@ func (mr *MockServiceMockRecorder) Exists(name interface{}) *gomock.Call {
 }
 
 // Save mocks base method
-func (m *MockService) Save(planet entity.Planet) error {
+func (m *MockService) Save(planet *entity.Planet) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Save", planet)
 	ret0, _ := ret[0].(error)

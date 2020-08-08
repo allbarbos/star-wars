@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"star-wars/api/handler"
@@ -268,6 +269,105 @@ func TestAll_Error( t *testing.T) {
 	assert.Equal(
 		t,
 		`{"error":"internal server error"}`,
+		w.Body.String(),
+	)
+}
+
+func TestPost( t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	body := bytes.NewBufferString(`{"name":"Kamino","climate":"temperate","terrain":"ocean"}`)
+	c.Request, _ = http.NewRequest("POST", "/planets", body)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	srvMock := mock_planet.NewMockService(ctrl)
+
+	srvMock.EXPECT().Save(
+		&entity.Planet{
+			Name: "Kamino",
+			Climate: "temperate",
+			Terrain: "ocean",
+		},
+	).Return(nil)
+
+	Planets{
+		Srv: srvMock,
+	}.Post(c)
+
+	assert.Equal(t, 201, w.Code)
+}
+
+func TestPost_InvalidPayload( t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	body := bytes.NewBufferString(``)
+	c.Request, _ = http.NewRequest("POST", "/planets", body)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	srvMock := mock_planet.NewMockService(ctrl)
+
+	Planets{
+		Srv: srvMock,
+	}.Post(c)
+
+	assert.Equal(t, 400, w.Code)
+	assert.Equal(
+		t,
+		`{"error":"body is invalid"}`,
+		w.Body.String(),
+	)
+}
+
+func TestPost_InvalidFields( t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	body := bytes.NewBufferString(`{"name":"","climate":"temperate","terrain":"ocean"}`)
+	c.Request, _ = http.NewRequest("POST", "/planets", body)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	srvMock := mock_planet.NewMockService(ctrl)
+
+	Planets{
+		Srv: srvMock,
+	}.Post(c)
+
+	assert.Equal(t, 400, w.Code)
+	assert.Equal(
+		t,
+		`{"error":"name, climate and terrain is required"}`,
+		w.Body.String(),
+	)
+}
+
+func TestPost_InternalError( t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	body := bytes.NewBufferString(`{"name":"Kamino","climate":"temperate","terrain":"ocean"}`)
+	c.Request, _ = http.NewRequest("POST", "/planets", body)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	srvMock := mock_planet.NewMockService(ctrl)
+
+	srvMock.EXPECT().Save(
+		&entity.Planet{
+			Name: "Kamino",
+			Climate: "temperate",
+			Terrain: "ocean",
+		},
+	).Return(handler.BadRequest{Message: "planet already registered"})
+
+	Planets{
+		Srv: srvMock,
+	}.Post(c)
+
+	assert.Equal(t, 400, w.Code)
+	assert.Equal(
+		t,
+		`{"error":"planet already registered"}`,
 		w.Body.String(),
 	)
 }
