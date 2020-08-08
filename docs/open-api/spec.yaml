@@ -2,6 +2,8 @@ openapi: 3.0.1
 info:
   title: Star Wars
   version: 1.0.0
+servers:
+- url: http://localhost:8000
 tags:
 - name: planets
   description: All about the planets
@@ -11,6 +13,19 @@ paths:
       tags:
       - planets
       summary: List all planets
+      parameters:
+      - name: limit
+        in: query
+        description: Results limit - Default 3
+        required: false
+        schema:
+          type: string
+      - name: skip
+        in: query
+        description: Skip items - Default 0
+        required: false
+        schema:
+          type: string
       responses:
         200:
           description: Ok
@@ -20,30 +35,77 @@ paths:
                 $ref: "#/components/schemas/Planets"
         400:
           description: Bad request
-          content: {}
-        404:
-          description: Not found
-          content: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRequest'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInternal"
     post:
       tags:
       - planets
-      summary: Add a new planet
+      summary: Add planet
       requestBody:
-        description: payload
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Planet"
+              $ref: "#/components/schemas/PlanetPost"
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Planet'
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRequest'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInternal"
+
+  /planets/{id}:
+    delete:
+      tags:
+      - planets
+      summary: Delete planet
+      parameters:
+      - name: id
+        in: path
+        description: Planet ID
+        example: "5f2c88567563c4bae600d7e0"
+        required: true
+        schema:
+          type: string
       responses:
         200:
           description: Ok
           content: {}
         400:
           description: Bad request
-          content: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRequest'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInternal"
 
-  /planets/{id}:
+  /planets/id/{id}:
     get:
       tags:
       - planets
@@ -51,8 +113,8 @@ paths:
       parameters:
       - name: id
         in: path
-        description: Planet Name
-        example: "d52ad233-02d2-4899-b014-d9c6dac62e5a"
+        description: Planet ID
+        example: "5f2c88567563c4bae600d7e0"
         required: true
         schema:
           type: string
@@ -65,35 +127,24 @@ paths:
                 $ref: "#/components/schemas/Planet"
         400:
           description: Bad request
-          content: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRequest'
         404:
-          description: Not found
-          content: {}
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRequest'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInternal"
 
-    delete:
-      tags:
-      - planets
-      summary: Delete planet
-      parameters:
-      - name: id
-        in: path
-        description: Planet Name
-        example: "d52ad233-02d2-4899-b014-d9c6dac62e5a"
-        required: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: Ok
-          content: {}
-        400:
-          description: Bad request
-          content: {}
-        404:
-          description: Not found
-          content: {}
-
-  /planets/{name}:
+  /planets/name/{name}:
     get:
       tags:
       - planets
@@ -115,22 +166,58 @@ paths:
                 $ref: "#/components/schemas/Planet"
         400:
           description: Bad request
-          content: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRequest'
         404:
-          description: Not found
-          content: {}
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRequest'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInternal"
 components:
   schemas:
+    ErrorRequest:
+      type: "object"
+      properties:
+        error:
+          type: "string"
+          example: "message"
+    ErrorInternal:
+      type: "object"
+      properties:
+        error:
+          type: "string"
+          example: "internal server error"
     Planets:
       type: array
       items:
         $ref: '#/components/schemas/Planet'
+    PlanetPost:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          example: "Alderaan"
+        climate:
+          type: "string"
+          example: "temperate"
+        terrain:
+          type: "string"
+          example: "grasslands, mountains"
     Planet:
       type: "object"
       properties:
         id:
           type: "string"
-          example: "d52ad233-02d2-4899-b014-d9c6dac62e5a"
+          example: "5f2c88567563c4bae600d7e0"
         name:
           type: "string"
           example: "Alderaan"

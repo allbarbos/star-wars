@@ -22,7 +22,7 @@ func loadEnv() {
 }
 
 func openCsv() *os.File {
-	csvfile, err := os.Open("seed.csv")
+	csvfile, err := os.Open(os.Getenv("PATH_CSV"))
 	if err != nil {
 		log.Fatalln("couldn't open the csv file", err)
 	}

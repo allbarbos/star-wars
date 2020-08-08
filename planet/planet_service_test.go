@@ -261,6 +261,18 @@ func TestFindByName(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
+func TestFindByName_InvalidNameParam(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockRepo := mock_planet.NewMockRepository(ctrl)
+	swapiMock := mock_swapi.NewMockService(ctrl)
+	defer ctrl.Finish()
+
+	srv := NewService(mockRepo, swapiMock)
+	_, err := srv.FindByName("")
+
+	assert.Equal(t, "name is invalid", err.Error())
+}
+
 func TestFindByName_NotFound(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockRepo := mock_planet.NewMockRepository(ctrl)
@@ -314,6 +326,18 @@ func TestFindByID(t *testing.T) {
 	assert.Equal(t, expected, result)
 }
 
+func TestFindByID_InvalidIDParam(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockRepo := mock_planet.NewMockRepository(ctrl)
+	swapiMock := mock_swapi.NewMockService(ctrl)
+	defer ctrl.Finish()
+
+	srv := NewService(mockRepo, swapiMock)
+	_, err := srv.FindByID("")
+
+	assert.Equal(t, "id is invalid", err.Error())
+}
+
 func TestFindByID_NotFound(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockRepo := mock_planet.NewMockRepository(ctrl)
@@ -358,6 +382,31 @@ func TestDelete(t *testing.T) {
 	err := srv.Delete("5f2c88567563c4bae600d7df")
 
 	assert.Equal(t, nil, err)
+}
+
+func TestDelete_IDParamEmpty(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockRepo := mock_planet.NewMockRepository(ctrl)
+	swapiMock := mock_swapi.NewMockService(ctrl)
+	defer ctrl.Finish()
+
+	srv := NewService(mockRepo, swapiMock)
+	err := srv.Delete("")
+
+	assert.Equal(t, "id is invalid", err.Error())
+}
+
+func TestDelete_IDParamInvalid(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockRepo := mock_planet.NewMockRepository(ctrl)
+	swapiMock := mock_swapi.NewMockService(ctrl)
+	defer ctrl.Finish()
+	mockRepo.EXPECT().Delete("abc").Return(errors.New("the provided hex string is not a valid ObjectID"))
+
+	srv := NewService(mockRepo, swapiMock)
+	err := srv.Delete("abc")
+
+	assert.Equal(t, "id is invalid", err.Error())
 }
 
 func TestDelete_Error(t *testing.T) {

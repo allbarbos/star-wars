@@ -46,6 +46,12 @@ func (s srv) Exists(name string) (bool, error) {
 
 // FindByName get planet
 func (s srv) FindByName(name string) (entity.Planet, error) {
+	var planet entity.Planet
+
+	if name == "" {
+		return planet, handler.BadRequest{Message: "name is invalid"}
+	}
+
 	planet, err := s.repo.FindByName(name)
 
 	if err != nil {
@@ -61,8 +67,14 @@ func (s srv) FindByName(name string) (entity.Planet, error) {
 	return planet, nil
 }
 
-// FindByName get planet
+// FindByID get planet
 func (s srv) FindByID(id string) (entity.Planet, error) {
+	var planet entity.Planet
+
+	if id == "" {
+		return planet, handler.BadRequest{Message: "id is invalid"}
+	}
+
 	planet, err := s.repo.FindByID(id)
 
 	if err != nil {
@@ -80,7 +92,14 @@ func (s srv) FindByID(id string) (entity.Planet, error) {
 
 // Delete planet
 func (s srv) Delete(id string) error {
+	if id == "" {
+		return handler.BadRequest{ Message: "id is invalid" }
+	}
+
 	if err := s.repo.Delete(id); err != nil {
+		if err.Error() == "the provided hex string is not a valid ObjectID" {
+			return handler.BadRequest{ Message: "id is invalid" }
+		}
 		return handler.InternalServer{ Message: err.Error() }
 	}
 	return nil

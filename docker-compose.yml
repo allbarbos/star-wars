@@ -1,10 +1,47 @@
 version: '3'
 services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile-api
+    depends_on:
+      - db
+      - openapi
+    environment:
+    - ENV=development
+    - PORT=8000
+    - DB_NAME=star-wars
+    - DB_HOST=mongodb://db:27017    
+    ports:
+      - 8000:8000
+    restart: always
+  importer:
+    build:
+      context: .
+      dockerfile: Dockerfile-importer
+    depends_on:
+      - db
+    environment:
+    - ENV=development
+    - DB_NAME=star-wars
+    - DB_HOST=mongodb://db:27017
+    - SWAPI_URL=https://swapi.dev/api
+    - PATH_CSV=./csv/seed.csv
+    volumes:
+    - ./importer/cmd/seed.csv:/root/csv/seed.csv    
   db:
     image: mvertes/alpine-mongo
     ports:
       - "27017:27017"
     volumes:
       - star-wars-api:/data/db
+  openapi:
+    image: swaggerapi/swagger-ui
+    ports:
+    - "8080:8080"
+    volumes:
+    - ./docs/open-api/spec.yaml:/spec.yaml
+    environment:
+      SWAGGER_JSON: /spec.yaml
 volumes:
   star-wars-api: {}

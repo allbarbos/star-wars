@@ -3,8 +3,6 @@ star-wars-api.coverprofile
 star-wars.coverprofile
 .env
 
-_bkp
-
 ### Go ###
 # Binaries for programs and plugins
 *.exe
