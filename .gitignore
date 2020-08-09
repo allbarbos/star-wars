@@ -1,6 +1,4 @@
-api/star-wars-api
-star-wars-api.coverprofile
-star-wars.coverprofile
+cover.out.tmp
 .env
 
 ### Go ###
