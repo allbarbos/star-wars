@@ -42,7 +42,7 @@ path: `api/cmd/main.go`
 
 ### Como usar  
 
-Executar `docker-compose up api` ou pela open spec em `http://localhost:8080`  
+Executar `docker-compose up api` e acessar o developer portal local `http://localhost:8080`  
 
 ---
 

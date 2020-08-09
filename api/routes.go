@@ -1,6 +1,7 @@
 package api
 
 import (
+	"net/http"
 	"os"
 	"star-wars/api/controller"
 	"star-wars/planet"
@@ -15,6 +16,7 @@ func Config() *gin.Engine {
 	}
 
 	router := gin.Default()
+	router.Use(configCors)
 
 	router.GET("/health-check", healthCtrl().HealthCheck)
 	router.GET("/planets", planetsCtrl().All)
@@ -24,6 +26,18 @@ func Config() *gin.Engine {
 	router.POST("/planets", planetsCtrl().Post)
 
 	return router
+}
+
+func configCors(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Methods", "*")
+	c.Header("Access-Control-Allow-Headers", "*")
+	c.Header("Content-Type", "application/json")
+	if c.Request.Method != "OPTIONS" {
+		c.Next()
+	} else {
+		c.AbortWithStatus(http.StatusOK)
+	}
 }
 
 func healthCtrl() controller.HealthCheck {

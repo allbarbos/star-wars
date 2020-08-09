@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile-api
     depends_on:
       - db
-      - openapi
+      - dev-portal
     environment:
     - ENV=development
     - PORT=8000
@@ -35,7 +35,7 @@ services:
       - "27017:27017"
     volumes:
       - star-wars-api:/data/db
-  openapi:
+  dev-portal:
     image: swaggerapi/swagger-ui
     ports:
     - "8080:8080"
