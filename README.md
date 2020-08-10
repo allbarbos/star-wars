@@ -1,4 +1,4 @@
-# Star Wars
+# Star Wars  ![Test](https://github.com/allbarbos/star-wars/workflows/Test/badge.svg)  
 
 #### Requisitos:
 
