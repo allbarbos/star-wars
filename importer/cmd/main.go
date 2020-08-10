@@ -31,8 +31,6 @@ func openCsv() *os.File {
 }
 
 func readCsv(file *os.File) []entity.Planet {
-	defer file.Close()
-
 	r := csv.NewReader(file)
 	r.Comma = ';'
 
@@ -65,6 +63,11 @@ func readCsv(file *os.File) []entity.Planet {
 		}
 
 		planets = append(planets, newPlanet)
+	}
+
+	err := file.Close()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	return planets

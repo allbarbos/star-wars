@@ -31,7 +31,12 @@ func (s swapi) GetPlanet(name string) (adapter.Planets, error) {
 		return adapter, err
 	}
 
-	json.NewDecoder(resp.Body).Decode(&adapter)
+	err = json.NewDecoder(resp.Body).Decode(&adapter)
+	
+	if err != nil {
+		log.Print(err)
+		return adapter, err
+	}
 
 	return adapter, nil
 }
