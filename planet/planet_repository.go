@@ -37,7 +37,7 @@ func NewRepository() Repository {
 	}
 }
 
-func db(ctx context.Context, r repo) (*mongo.Client, *mongo.Collection, error){
+func db(ctx context.Context, r repo) (*mongo.Client, *mongo.Collection, error) {
 	cli, err := mongo.Connect(ctx, r.Options)
 	col := cli.Database(os.Getenv("DB_NAME")).Collection("planets")
 	return cli, col, err
@@ -135,13 +135,13 @@ func (r repo) Save(planet *entity.Planet) error {
 		return err
 	}
 
-	oid, _ := result.InsertedID.(primitive.ObjectID);
+	oid, _ := result.InsertedID.(primitive.ObjectID)
 	planet.ID = oid.Hex()
 
 	return nil
 }
 
-func (r repo) Delete(id string) error{
+func (r repo) Delete(id string) error {
 	_id, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {

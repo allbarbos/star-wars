@@ -17,14 +17,14 @@ type Service interface {
 }
 
 type srv struct {
-	repo Repository
+	repo  Repository
 	swapi swapi.Service
 }
 
 // NewService returns a planet service instance
 func NewService(r Repository, s swapi.Service) Service {
 	return &srv{
-		repo: r,
+		repo:  r,
 		swapi: s,
 	}
 }
@@ -57,9 +57,9 @@ func (s srv) FindByName(name string) (entity.Planet, error) {
 	if err != nil {
 		var newError error
 		if err.Error() == "mongo: no documents in result" {
-			newError = handler.NotFound{ Message: "planet not found" }
+			newError = handler.NotFound{Message: "planet not found"}
 		} else {
-			newError = handler.InternalServer{ Message: err.Error() }
+			newError = handler.InternalServer{Message: err.Error()}
 		}
 		return planet, newError
 	}
@@ -80,9 +80,9 @@ func (s srv) FindByID(id string) (entity.Planet, error) {
 	if err != nil {
 		var newError error
 		if err.Error() == "mongo: no documents in result" {
-			newError = handler.NotFound{ Message: "planet not found" }
+			newError = handler.NotFound{Message: "planet not found"}
 		} else {
-			newError = handler.InternalServer{ Message: err.Error() }
+			newError = handler.InternalServer{Message: err.Error()}
 		}
 		return planet, newError
 	}
@@ -93,14 +93,14 @@ func (s srv) FindByID(id string) (entity.Planet, error) {
 // Delete planet
 func (s srv) Delete(id string) error {
 	if id == "" {
-		return handler.BadRequest{ Message: "id is invalid" }
+		return handler.BadRequest{Message: "id is invalid"}
 	}
 
 	if err := s.repo.Delete(id); err != nil {
 		if err.Error() == "the provided hex string is not a valid ObjectID" {
-			return handler.BadRequest{ Message: "id is invalid" }
+			return handler.BadRequest{Message: "id is invalid"}
 		}
-		return handler.InternalServer{ Message: err.Error() }
+		return handler.InternalServer{Message: err.Error()}
 	}
 	return nil
 }
@@ -109,7 +109,7 @@ func (s srv) Delete(id string) error {
 func (s srv) FindAll(limit int64, skip int64) ([]entity.Planet, error) {
 	planets, err := s.repo.FindAll(limit, skip)
 	if err != nil {
-		return planets, handler.InternalServer{ Message: err.Error() }
+		return planets, handler.InternalServer{Message: err.Error()}
 	}
 	return planets, nil
 }
@@ -117,7 +117,7 @@ func (s srv) FindAll(limit int64, skip int64) ([]entity.Planet, error) {
 // Save planet
 func (s srv) Save(planet *entity.Planet) error {
 	name := planet.Name
-	exists, err :=  s.Exists(name)
+	exists, err := s.Exists(name)
 
 	if err != nil {
 		return err

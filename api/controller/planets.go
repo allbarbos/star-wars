@@ -16,7 +16,7 @@ type Planets struct {
 
 // All get planets
 func (p Planets) All(c *gin.Context) {
-	limit, err :=  strconv.ParseInt(c.DefaultQuery("limit", "3"), 10, 64)
+	limit, err := strconv.ParseInt(c.DefaultQuery("limit", "3"), 10, 64)
 	if err != nil {
 		handler.ResponseError(
 			handler.BadRequest{
@@ -30,7 +30,7 @@ func (p Planets) All(c *gin.Context) {
 	skip, err := strconv.ParseInt(c.DefaultQuery("skip", "0"), 10, 64)
 	if err != nil {
 		handler.ResponseError(
-				handler.BadRequest{
+			handler.BadRequest{
 				Message: "skip is invalid",
 			},
 			c,

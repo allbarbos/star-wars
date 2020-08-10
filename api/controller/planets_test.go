@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestByName( t *testing.T) {
+func TestByName(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	pathParam := gin.Param{Key: "name", Value: "Tatooine"}
@@ -24,10 +24,10 @@ func TestByName( t *testing.T) {
 	srvMock := mock_planet.NewMockService(ctrl)
 	srvMock.EXPECT().FindByName("Tatooine").Return(
 		entity.Planet{
-			ID: "5f29e53f2939a742014a04af",
-			Name: "Tatooine",
-			Climate: "arid",
-			Terrain: "desert",
+			ID:         "5f29e53f2939a742014a04af",
+			Name:       "Tatooine",
+			Climate:    "arid",
+			Terrain:    "desert",
 			TotalFilms: 5,
 		},
 		nil,
@@ -45,7 +45,7 @@ func TestByName( t *testing.T) {
 	)
 }
 
-func TestByName_Error( t *testing.T) {
+func TestByName_Error(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	pathParam := gin.Param{Key: "name", Value: "NotFound"}
@@ -54,7 +54,7 @@ func TestByName_Error( t *testing.T) {
 	defer ctrl.Finish()
 	srvMock := mock_planet.NewMockService(ctrl)
 
-	srvMock.EXPECT().FindByName("NotFound").Return(entity.Planet{}, handler.NotFound{ Message: "planet not found" })
+	srvMock.EXPECT().FindByName("NotFound").Return(entity.Planet{}, handler.NotFound{Message: "planet not found"})
 
 	Planets{
 		Srv: srvMock,
@@ -64,7 +64,7 @@ func TestByName_Error( t *testing.T) {
 	assert.Equal(t, `{"error":"planet not found"}`, w.Body.String())
 }
 
-func TestByID( t *testing.T) {
+func TestByID(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	pathParam := gin.Param{Key: "id", Value: "5f29e53f2939a742014a04af"}
@@ -74,10 +74,10 @@ func TestByID( t *testing.T) {
 	srvMock := mock_planet.NewMockService(ctrl)
 	srvMock.EXPECT().FindByID("5f29e53f2939a742014a04af").Return(
 		entity.Planet{
-			ID: "5f29e53f2939a742014a04af",
-			Name: "Tatooine",
-			Climate: "arid",
-			Terrain: "desert",
+			ID:         "5f29e53f2939a742014a04af",
+			Name:       "Tatooine",
+			Climate:    "arid",
+			Terrain:    "desert",
 			TotalFilms: 5,
 		},
 		nil,
@@ -95,7 +95,7 @@ func TestByID( t *testing.T) {
 	)
 }
 
-func TestByID_Error( t *testing.T) {
+func TestByID_Error(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	pathParam := gin.Param{Key: "id", Value: "NotFound"}
@@ -104,7 +104,7 @@ func TestByID_Error( t *testing.T) {
 	defer ctrl.Finish()
 	srvMock := mock_planet.NewMockService(ctrl)
 
-	srvMock.EXPECT().FindByID("NotFound").Return(entity.Planet{}, handler.NotFound{ Message: "planet not found" })
+	srvMock.EXPECT().FindByID("NotFound").Return(entity.Planet{}, handler.NotFound{Message: "planet not found"})
 
 	Planets{
 		Srv: srvMock,
@@ -114,7 +114,7 @@ func TestByID_Error( t *testing.T) {
 	assert.Equal(t, `{"error":"planet not found"}`, w.Body.String())
 }
 
-func TestDelete( t *testing.T) {
+func TestDelete(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	pathParam := gin.Param{Key: "id", Value: "5f29e53f2939a742014a04af"}
@@ -131,7 +131,7 @@ func TestDelete( t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 }
 
-func TestDelete_Error( t *testing.T) {
+func TestDelete_Error(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	pathParam := gin.Param{Key: "id", Value: "5f29e53f2939a742014a04af"}
@@ -139,7 +139,7 @@ func TestDelete_Error( t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	srvMock := mock_planet.NewMockService(ctrl)
-	srvMock.EXPECT().Delete("5f29e53f2939a742014a04af").Return(handler.InternalServer{ Message: "error" })
+	srvMock.EXPECT().Delete("5f29e53f2939a742014a04af").Return(handler.InternalServer{Message: "error"})
 
 	Planets{
 		Srv: srvMock,
@@ -149,7 +149,7 @@ func TestDelete_Error( t *testing.T) {
 	assert.Equal(t, `{"error":"internal server error"}`, w.Body.String())
 }
 
-func TestAll( t *testing.T) {
+func TestAll(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request, _ = http.NewRequest("GET", "http://t.test/?limit=3&skip=0", nil)
@@ -165,24 +165,24 @@ func TestAll( t *testing.T) {
 	srvMock.EXPECT().FindAll(limit, skip).Return(
 		[]entity.Planet{
 			{
-				ID: "5f2c891e9a9e070b1ef2e28c",
-				Name: "Alderaan",
-				Climate: "temperate",
-				Terrain: "grasslands, mountains",
+				ID:         "5f2c891e9a9e070b1ef2e28c",
+				Name:       "Alderaan",
+				Climate:    "temperate",
+				Terrain:    "grasslands, mountains",
 				TotalFilms: 2,
 			},
 			{
-				ID: "5f2c891e9a9e070b1ef2e28d",
-				Name: "Tatooine",
-				Climate: "arid",
-				Terrain: "desert",
+				ID:         "5f2c891e9a9e070b1ef2e28d",
+				Name:       "Tatooine",
+				Climate:    "arid",
+				Terrain:    "desert",
 				TotalFilms: 5,
 			},
 			{
-				ID: "5f2c891e9a9e070b1ef2e28e",
-				Name: "Yavin IV",
-				Climate: "temperate, tropical",
-				Terrain: "jungle, rainforests",
+				ID:         "5f2c891e9a9e070b1ef2e28e",
+				Name:       "Yavin IV",
+				Climate:    "temperate, tropical",
+				Terrain:    "jungle, rainforests",
 				TotalFilms: 1,
 			},
 		},
@@ -201,7 +201,7 @@ func TestAll( t *testing.T) {
 	)
 }
 
-func TestAll_LimitInvalid( t *testing.T) {
+func TestAll_LimitInvalid(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request, _ = http.NewRequest("GET", "http://t.test/?limit=a&skip=0", nil)
@@ -222,7 +222,7 @@ func TestAll_LimitInvalid( t *testing.T) {
 	)
 }
 
-func TestAll_SkipInvalid( t *testing.T) {
+func TestAll_SkipInvalid(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request, _ = http.NewRequest("GET", "http://t.test/?limit=3&skip=a", nil)
@@ -243,7 +243,7 @@ func TestAll_SkipInvalid( t *testing.T) {
 	)
 }
 
-func TestAll_Error( t *testing.T) {
+func TestAll_Error(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request, _ = http.NewRequest("GET", "http://t.test/?limit=3&skip=0", nil)
@@ -273,7 +273,7 @@ func TestAll_Error( t *testing.T) {
 	)
 }
 
-func TestPost( t *testing.T) {
+func TestPost(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	body := bytes.NewBufferString(`{"name":"Kamino","climate":"temperate","terrain":"ocean"}`)
@@ -285,7 +285,7 @@ func TestPost( t *testing.T) {
 
 	srvMock.EXPECT().Save(
 		&entity.Planet{
-			Name: "Kamino",
+			Name:    "Kamino",
 			Climate: "temperate",
 			Terrain: "ocean",
 		},
@@ -298,7 +298,7 @@ func TestPost( t *testing.T) {
 	assert.Equal(t, 201, w.Code)
 }
 
-func TestPost_InvalidPayload( t *testing.T) {
+func TestPost_InvalidPayload(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	body := bytes.NewBufferString(``)
@@ -320,7 +320,7 @@ func TestPost_InvalidPayload( t *testing.T) {
 	)
 }
 
-func TestPost_InvalidFields( t *testing.T) {
+func TestPost_InvalidFields(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	body := bytes.NewBufferString(`{"name":"","climate":"temperate","terrain":"ocean"}`)
@@ -342,7 +342,7 @@ func TestPost_InvalidFields( t *testing.T) {
 	)
 }
 
-func TestPost_InternalError( t *testing.T) {
+func TestPost_InternalError(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	body := bytes.NewBufferString(`{"name":"Kamino","climate":"temperate","terrain":"ocean"}`)
@@ -354,7 +354,7 @@ func TestPost_InternalError( t *testing.T) {
 
 	srvMock.EXPECT().Save(
 		&entity.Planet{
-			Name: "Kamino",
+			Name:    "Kamino",
 			Climate: "temperate",
 			Terrain: "ocean",
 		},

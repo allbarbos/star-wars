@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCheckDependencies( t *testing.T) {
+func TestCheckDependencies(t *testing.T) {
 	hc := HealthCheck{
 		Status: "ok",
 		Dependencies: Dependencies{
@@ -19,7 +19,7 @@ func TestCheckDependencies( t *testing.T) {
 	assert.Equal(t, 200, status)
 }
 
-func TestCheckDependencies_Error( t *testing.T) {
+func TestCheckDependencies_Error(t *testing.T) {
 	hc := HealthCheck{
 		Status: "error",
 		Dependencies: Dependencies{

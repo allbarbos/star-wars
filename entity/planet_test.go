@@ -11,10 +11,10 @@ import (
 // When all fields are filled
 func TestIsEmpty(t *testing.T) {
 	valid := Planet{
-		ID: "5f25e9782b148406adb55727",
-		Name: "Tatooine",
-		Climate: "arid",
-		Terrain: "desert",
+		ID:         "5f25e9782b148406adb55727",
+		Name:       "Tatooine",
+		Climate:    "arid",
+		Terrain:    "desert",
 		TotalFilms: 1,
 	}.IsEmpty([]string{"ID", "Name", "Climate", "Terrain", "TotalFilms"})
 
@@ -23,24 +23,24 @@ func TestIsEmpty(t *testing.T) {
 
 // When a field is empty
 func TestIsEmptyFalseParallel(t *testing.T) {
-	testID := func (t *testing.T) {
+	testID := func(t *testing.T) {
 		valid := Planet{
-			ID: "",
-			Name: "Tatooine",
-			Climate: "arid",
-			Terrain: "desert",
+			ID:         "",
+			Name:       "Tatooine",
+			Climate:    "arid",
+			Terrain:    "desert",
 			TotalFilms: 5,
 		}.IsEmpty([]string{"ID"})
 
 		assert.Equal(t, true, valid)
 	}
 
-	testTotalFilms := func (t *testing.T) {
+	testTotalFilms := func(t *testing.T) {
 		valid := Planet{
-			ID: "5f25e9782b148406adb55727",
-			Name: "Tatooine",
-			Climate: "arid",
-			Terrain: "desert",
+			ID:         "5f25e9782b148406adb55727",
+			Name:       "Tatooine",
+			Climate:    "arid",
+			Terrain:    "desert",
 			TotalFilms: 0,
 		}.IsEmpty([]string{"TotalFilms"})
 
@@ -48,8 +48,8 @@ func TestIsEmptyFalseParallel(t *testing.T) {
 	}
 
 	t.Run("group", func(t *testing.T) {
-			t.Run("ID", testID)
-			t.Run("TotalFilms", testTotalFilms)
+		t.Run("ID", testID)
+		t.Run("TotalFilms", testTotalFilms)
 	})
 }
 

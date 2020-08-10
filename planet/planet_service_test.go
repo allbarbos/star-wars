@@ -21,10 +21,10 @@ func TestExists(t *testing.T) {
 	defer ctrl.Finish()
 
 	planet := entity.Planet{
-		ID: "5f25e9782b148406adb55727",
-		Name: "Tatooine",
-		Climate: "arid",
-		Terrain: "desert",
+		ID:         "5f25e9782b148406adb55727",
+		Name:       "Tatooine",
+		Climate:    "arid",
+		Terrain:    "desert",
 		TotalFilms: 5,
 	}
 	mockRepo.EXPECT().FindByName("Tatooine").Return(planet, nil)
@@ -71,9 +71,9 @@ func TestSave(t *testing.T) {
 	defer ctrl.Finish()
 
 	planet := entity.Planet{
-		Name: "Tatooine",
-		Climate: "arid",
-		Terrain: "desert",
+		Name:       "Tatooine",
+		Climate:    "arid",
+		Terrain:    "desert",
 		TotalFilms: 5,
 	}
 
@@ -105,9 +105,9 @@ func TestSave_ExistsError(t *testing.T) {
 	expected := errors.New("error saving planet")
 
 	planet := entity.Planet{
-		Name: "Tatooine",
-		Climate: "arid",
-		Terrain: "desert",
+		Name:       "Tatooine",
+		Climate:    "arid",
+		Terrain:    "desert",
 		TotalFilms: 5,
 	}
 
@@ -126,10 +126,10 @@ func TestSave_NotExists(t *testing.T) {
 	defer ctrl.Finish()
 
 	exist := entity.Planet{
-		ID: "5f29e53f2939a742014a04af",
-		Name: "Tatooine",
-		Climate: "arid",
-		Terrain: "desert",
+		ID:         "5f29e53f2939a742014a04af",
+		Name:       "Tatooine",
+		Climate:    "arid",
+		Terrain:    "desert",
 		TotalFilms: 5,
 	}
 
@@ -137,7 +137,7 @@ func TestSave_NotExists(t *testing.T) {
 
 	srv := NewService(mockRepo, swapiMock)
 	err := srv.Save(&entity.Planet{
-		Name: "Tatooine",
+		Name:    "Tatooine",
 		Climate: "arid",
 		Terrain: "desert",
 	})
@@ -156,7 +156,7 @@ func TestSave_SwapiError(t *testing.T) {
 
 	srv := NewService(mockRepo, swapiMock)
 	err := srv.Save(&entity.Planet{
-		Name: "Tatooine",
+		Name:    "Tatooine",
 		Climate: "arid",
 		Terrain: "desert",
 	})
@@ -175,7 +175,7 @@ func TestSave_SwapiNotFound(t *testing.T) {
 
 	srv := NewService(mockRepo, swapiMock)
 	err := srv.Save(&entity.Planet{
-		Name: "Test",
+		Name:    "Test",
 		Climate: "arid",
 		Terrain: "desert",
 	})
@@ -190,7 +190,7 @@ func TestSave_ErrorTotalAppearances(t *testing.T) {
 	defer ctrl.Finish()
 
 	adp := adapter.Planets{
-		Count: 1,
+		Count:   1,
 		Results: []adapter.Planet{},
 	}
 
@@ -199,9 +199,9 @@ func TestSave_ErrorTotalAppearances(t *testing.T) {
 
 	srv := NewService(mockRepo, swapiMock)
 	err := srv.Save(&entity.Planet{
-		Name: "Tatooine",
-		Climate: "arid",
-		Terrain: "desert",
+		Name:       "Tatooine",
+		Climate:    "arid",
+		Terrain:    "desert",
 		TotalFilms: 5,
 	})
 
@@ -215,9 +215,9 @@ func TestSave_Error(t *testing.T) {
 	defer ctrl.Finish()
 
 	planet := entity.Planet{
-		Name: "Tatooine",
-		Climate: "arid",
-		Terrain: "desert",
+		Name:       "Tatooine",
+		Climate:    "arid",
+		Terrain:    "desert",
 		TotalFilms: 5,
 	}
 
@@ -247,10 +247,10 @@ func TestFindByName(t *testing.T) {
 	swapiMock := mock_swapi.NewMockService(ctrl)
 	defer ctrl.Finish()
 	expected := entity.Planet{
-		ID: "5f29e53f2939a742014a04af",
-		Name: "Tatooine",
-		Climate: "arid",
-		Terrain: "desert",
+		ID:         "5f29e53f2939a742014a04af",
+		Name:       "Tatooine",
+		Climate:    "arid",
+		Terrain:    "desert",
 		TotalFilms: 5,
 	}
 	mockRepo.EXPECT().FindByName("Tatooine").Return(expected, nil)
@@ -312,10 +312,10 @@ func TestFindByID(t *testing.T) {
 	swapiMock := mock_swapi.NewMockService(ctrl)
 	defer ctrl.Finish()
 	expected := entity.Planet{
-		ID: "5f29e53f2939a742014a04af",
-		Name: "Tatooine",
-		Climate: "arid",
-		Terrain: "desert",
+		ID:         "5f29e53f2939a742014a04af",
+		Name:       "Tatooine",
+		Climate:    "arid",
+		Terrain:    "desert",
 		TotalFilms: 5,
 	}
 	mockRepo.EXPECT().FindByID("Tatooine").Return(expected, nil)
@@ -414,7 +414,7 @@ func TestDelete_Error(t *testing.T) {
 	mockRepo := mock_planet.NewMockRepository(ctrl)
 	swapiMock := mock_swapi.NewMockService(ctrl)
 	defer ctrl.Finish()
-	mockRepo.EXPECT().Delete("5f2c88567563c4bae600d7df").Return(handler.InternalServer{ Message: "error" })
+	mockRepo.EXPECT().Delete("5f2c88567563c4bae600d7df").Return(handler.InternalServer{Message: "error"})
 
 	srv := NewService(mockRepo, swapiMock)
 	err := srv.Delete("5f2c88567563c4bae600d7df")
@@ -435,29 +435,29 @@ func TestFindAll(t *testing.T) {
 
 	expected := []entity.Planet{
 		{
-			ID: "5f2c891e9a9e070b1ef2e28c",
-			Name: "Alderaan",
-			Climate: "temperate",
-			Terrain: "grasslands, mountains",
+			ID:         "5f2c891e9a9e070b1ef2e28c",
+			Name:       "Alderaan",
+			Climate:    "temperate",
+			Terrain:    "grasslands, mountains",
 			TotalFilms: 2,
 		},
 		{
-			ID: "5f2c891e9a9e070b1ef2e28d",
-			Name: "Tatooine",
-			Climate: "arid",
-			Terrain: "desert",
+			ID:         "5f2c891e9a9e070b1ef2e28d",
+			Name:       "Tatooine",
+			Climate:    "arid",
+			Terrain:    "desert",
 			TotalFilms: 5,
 		},
 		{
-			ID: "5f2c891e9a9e070b1ef2e28e",
-			Name: "Yavin IV",
-			Climate: "temperate, tropical",
-			Terrain: "jungle, rainforests",
+			ID:         "5f2c891e9a9e070b1ef2e28e",
+			Name:       "Yavin IV",
+			Climate:    "temperate, tropical",
+			Terrain:    "jungle, rainforests",
 			TotalFilms: 1,
 		},
 	}
 
-	mockRepo.EXPECT().FindAll(limit, skip).Return(expected,nil)
+	mockRepo.EXPECT().FindAll(limit, skip).Return(expected, nil)
 
 	srv := NewService(mockRepo, swapiMock)
 	result, _ := srv.FindAll(3, 0)
@@ -480,5 +480,5 @@ func TestFindAll_Error(t *testing.T) {
 	srv := NewService(mockRepo, swapiMock)
 	_, err := srv.FindAll(3, 0)
 
-	assert.Equal(t, handler.InternalServer{Message:"error"}, err)
+	assert.Equal(t, handler.InternalServer{Message: "error"}, err)
 }

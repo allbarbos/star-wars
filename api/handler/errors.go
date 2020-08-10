@@ -13,7 +13,7 @@ func (b BadRequest) Error() string {
 
 // InternalServer HTTP 500
 type InternalServer struct {
-	Status int
+	Status  int
 	Message string
 }
 
@@ -24,7 +24,7 @@ func (i InternalServer) Error() string {
 
 // NotFound HTTP 404
 type NotFound struct {
-	Status int
+	Status  int
 	Message string
 }
 

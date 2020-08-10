@@ -14,7 +14,7 @@ type Service interface {
 	GetPlanet(name string) (adapter.Planets, error)
 }
 
-type swapi struct {}
+type swapi struct{}
 
 // New returns a swapi service instance
 func New() Service {
@@ -32,7 +32,7 @@ func (s swapi) GetPlanet(name string) (adapter.Planets, error) {
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(&adapter)
-	
+
 	if err != nil {
 		log.Print(err)
 		return adapter, err

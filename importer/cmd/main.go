@@ -35,7 +35,7 @@ func readCsv(file *os.File) []entity.Planet {
 	r.Comma = ';'
 
 	if _, err := r.Read(); err != nil {
-    panic(err)
+		panic(err)
 	}
 
 	var planets []entity.Planet
@@ -50,7 +50,7 @@ func readCsv(file *os.File) []entity.Planet {
 		}
 
 		newPlanet := entity.Planet{
-			Name: rec[0],
+			Name:    rec[0],
 			Climate: rec[1],
 			Terrain: rec[2],
 		}

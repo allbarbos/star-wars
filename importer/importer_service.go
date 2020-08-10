@@ -16,14 +16,14 @@ type Service interface {
 
 type service struct {
 	planetSrv planet.Service
-	swapiSrv swapi.Service
+	swapiSrv  swapi.Service
 }
 
 // NewImporter returns a importer service instance
 func NewImporter(s planet.Service, swapi swapi.Service) Service {
 	return &service{
 		planetSrv: s,
-		swapiSrv: swapi,
+		swapiSrv:  swapi,
 	}
 }
 
