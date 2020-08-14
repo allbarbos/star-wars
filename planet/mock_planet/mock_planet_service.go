@@ -5,6 +5,7 @@
 package mock_planet
 
 import (
+	context "context"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 	entity "star-wars/entity"
@@ -34,89 +35,89 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // Exists mocks base method
-func (m *MockService) Exists(name string) (bool, error) {
+func (m *MockService) Exists(ctx context.Context, name string) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Exists", name)
+	ret := m.ctrl.Call(m, "Exists", ctx, name)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Exists indicates an expected call of Exists
-func (mr *MockServiceMockRecorder) Exists(name interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Exists(ctx, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exists", reflect.TypeOf((*MockService)(nil).Exists), name)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exists", reflect.TypeOf((*MockService)(nil).Exists), ctx, name)
 }
 
 // Save mocks base method
-func (m *MockService) Save(planet *entity.Planet) error {
+func (m *MockService) Save(ctx context.Context, planet *entity.Planet) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Save", planet)
+	ret := m.ctrl.Call(m, "Save", ctx, planet)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Save indicates an expected call of Save
-func (mr *MockServiceMockRecorder) Save(planet interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Save(ctx, planet interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockService)(nil).Save), planet)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockService)(nil).Save), ctx, planet)
 }
 
 // FindAll mocks base method
-func (m *MockService) FindAll(limit, skip int64) ([]entity.Planet, error) {
+func (m *MockService) FindAll(ctx context.Context, limit, skip int64) (*[]entity.Planet, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", limit, skip)
-	ret0, _ := ret[0].([]entity.Planet)
+	ret := m.ctrl.Call(m, "FindAll", ctx, limit, skip)
+	ret0, _ := ret[0].(*[]entity.Planet)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindAll indicates an expected call of FindAll
-func (mr *MockServiceMockRecorder) FindAll(limit, skip interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) FindAll(ctx, limit, skip interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockService)(nil).FindAll), limit, skip)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockService)(nil).FindAll), ctx, limit, skip)
 }
 
 // FindByName mocks base method
-func (m *MockService) FindByName(name string) (entity.Planet, error) {
+func (m *MockService) FindByName(ctx context.Context, name string) (*entity.Planet, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByName", name)
-	ret0, _ := ret[0].(entity.Planet)
+	ret := m.ctrl.Call(m, "FindByName", ctx, name)
+	ret0, _ := ret[0].(*entity.Planet)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByName indicates an expected call of FindByName
-func (mr *MockServiceMockRecorder) FindByName(name interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) FindByName(ctx, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByName", reflect.TypeOf((*MockService)(nil).FindByName), name)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByName", reflect.TypeOf((*MockService)(nil).FindByName), ctx, name)
 }
 
 // FindByID mocks base method
-func (m *MockService) FindByID(id string) (entity.Planet, error) {
+func (m *MockService) FindByID(ctx context.Context, id string) (*entity.Planet, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByID", id)
-	ret0, _ := ret[0].(entity.Planet)
+	ret := m.ctrl.Call(m, "FindByID", ctx, id)
+	ret0, _ := ret[0].(*entity.Planet)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByID indicates an expected call of FindByID
-func (mr *MockServiceMockRecorder) FindByID(id interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) FindByID(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockService)(nil).FindByID), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockService)(nil).FindByID), ctx, id)
 }
 
 // Delete mocks base method
-func (m *MockService) Delete(id string) error {
+func (m *MockService) Delete(ctx context.Context, id string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", id)
+	ret := m.ctrl.Call(m, "Delete", ctx, id)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockServiceMockRecorder) Delete(id interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) Delete(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockService)(nil).Delete), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockService)(nil).Delete), ctx, id)
 }

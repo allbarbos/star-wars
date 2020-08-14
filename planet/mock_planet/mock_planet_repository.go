@@ -5,6 +5,7 @@
 package mock_planet
 
 import (
+	context "context"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 	entity "star-wars/entity"
@@ -33,89 +34,89 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
-// Ping mocks base method
-func (m *MockRepository) Ping() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Ping")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// Ping indicates an expected call of Ping
-func (mr *MockRepositoryMockRecorder) Ping() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*MockRepository)(nil).Ping))
-}
-
 // FindAll mocks base method
-func (m *MockRepository) FindAll(limit, skip int64) ([]entity.Planet, error) {
+func (m *MockRepository) FindAll(ctx context.Context, limit, skip int64) (*[]entity.Planet, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", limit, skip)
-	ret0, _ := ret[0].([]entity.Planet)
+	ret := m.ctrl.Call(m, "FindAll", ctx, limit, skip)
+	ret0, _ := ret[0].(*[]entity.Planet)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindAll indicates an expected call of FindAll
-func (mr *MockRepositoryMockRecorder) FindAll(limit, skip interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) FindAll(ctx, limit, skip interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockRepository)(nil).FindAll), limit, skip)
-}
-
-// FindByID mocks base method
-func (m *MockRepository) FindByID(id string) (entity.Planet, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByID", id)
-	ret0, _ := ret[0].(entity.Planet)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindByID indicates an expected call of FindByID
-func (mr *MockRepositoryMockRecorder) FindByID(id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockRepository)(nil).FindByID), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockRepository)(nil).FindAll), ctx, limit, skip)
 }
 
 // FindByName mocks base method
-func (m *MockRepository) FindByName(name string) (entity.Planet, error) {
+func (m *MockRepository) FindByName(ctx context.Context, name string) (*entity.Planet, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByName", name)
-	ret0, _ := ret[0].(entity.Planet)
+	ret := m.ctrl.Call(m, "FindByName", ctx, name)
+	ret0, _ := ret[0].(*entity.Planet)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByName indicates an expected call of FindByName
-func (mr *MockRepositoryMockRecorder) FindByName(name interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) FindByName(ctx, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByName", reflect.TypeOf((*MockRepository)(nil).FindByName), name)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByName", reflect.TypeOf((*MockRepository)(nil).FindByName), ctx, name)
+}
+
+// FindByID mocks base method
+func (m *MockRepository) FindByID(ctx context.Context, id string) (*entity.Planet, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindByID", ctx, id)
+	ret0, _ := ret[0].(*entity.Planet)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByID indicates an expected call of FindByID
+func (mr *MockRepositoryMockRecorder) FindByID(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockRepository)(nil).FindByID), ctx, id)
 }
 
 // Save mocks base method
-func (m *MockRepository) Save(planet *entity.Planet) error {
+func (m *MockRepository) Save(ctx context.Context, planet *entity.Planet) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Save", planet)
+	ret := m.ctrl.Call(m, "Save", ctx, planet)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Save indicates an expected call of Save
-func (mr *MockRepositoryMockRecorder) Save(planet interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) Save(ctx, planet interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockRepository)(nil).Save), planet)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockRepository)(nil).Save), ctx, planet)
 }
 
 // Delete mocks base method
-func (m *MockRepository) Delete(id string) error {
+func (m *MockRepository) Delete(ctx context.Context, id string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", id)
+	ret := m.ctrl.Call(m, "Delete", ctx, id)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockRepositoryMockRecorder) Delete(id interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) Delete(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockRepository)(nil).Delete), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockRepository)(nil).Delete), ctx, id)
+}
+
+// Ping mocks base method
+func (m *MockRepository) Ping(ctx context.Context) string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Ping", ctx)
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Ping indicates an expected call of Ping
+func (mr *MockRepositoryMockRecorder) Ping(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*MockRepository)(nil).Ping), ctx)
 }

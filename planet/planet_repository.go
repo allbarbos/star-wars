@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"star-wars/entity"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,122 +15,124 @@ import (
 
 // Repository contract
 type Repository interface {
-	Ping() string
-	FindAll(limit int64, skip int64) ([]entity.Planet, error)
-	FindByID(id string) (entity.Planet, error)
-	FindByName(name string) (entity.Planet, error)
-	Save(planet *entity.Planet) error
-	Delete(id string) error
+	FindAll(ctx context.Context, limit int64, skip int64) (*[]entity.Planet, error)
+	FindByName(ctx context.Context, name string) (*entity.Planet, error)
+	FindByID(ctx context.Context, id string) (*entity.Planet, error)
+	Save(ctx context.Context, planet *entity.Planet) error
+	Delete(ctx context.Context, id string) error
+	Ping(ctx context.Context) string
 }
 
-type repo struct {
-	Options *options.ClientOptions
-}
+type repo struct {}
 
 // NewRepository planet
 func NewRepository() Repository {
-	uri := os.Getenv("DB_HOST")
-	options := options.Client().ApplyURI(uri)
-	return &repo{
-		Options: options,
+	return &repo{}
+}
+
+func cnx(ctx context.Context) (*mongo.Collection, error){
+	c, _ := mongo.NewClient(options.Client().ApplyURI(os.Getenv("DB_HOST")))
+	err := c.Connect(ctx)
+	coll := c.Database(os.Getenv("DB_NAME")).Collection("planets")
+
+	return coll, err
+}
+
+func (r repo) FindAll(ctx context.Context, limit int64, skip int64) (*[]entity.Planet, error) {
+	coll, err := cnx(ctx)
+
+	if err != nil {
+		return nil, err
 	}
-}
 
-func db(ctx context.Context, r repo) (*mongo.Client, *mongo.Collection, error) {
-	cli, err := mongo.Connect(ctx, r.Options)
-	col := cli.Database(os.Getenv("DB_NAME")).Collection("planets")
-	return cli, col, err
-}
+	defer coll.Database().Client().Disconnect(ctx)
 
-// Ping check connection
-func (r repo) Ping() string {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
+	opt := options.Find()
+	opt.SetLimit(limit)
+	opt.SetSkip(skip)
 
-	cnx, _, err := db(ctx, r)
-	defer cnx.Disconnect(ctx)
-
-	err = cnx.Ping(ctx, readpref.Primary())
+	cr, err := coll.Find(ctx, bson.D{}, opt)
 
 	if err != nil {
 		log.Print(err)
-		return "error"
+		return nil, err
 	}
 
-	return "ok"
-}
+	planets := &[]entity.Planet{}
 
-func (r repo) FindByName(name string) (entity.Planet, error) {
-	filter := bson.M{"name": name}
-	planet := entity.Planet{}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-
-	cnx, db, err := db(ctx, r)
-	defer cnx.Disconnect(ctx)
+	err = cr.All(ctx, planets)
 
 	if err != nil {
-		return planet, err
+		return nil, err
 	}
 
-	err = db.FindOne(ctx, filter).Decode(&planet)
-
-	if err != nil {
-		return planet, err
-	}
-
-	return planet, nil
+	return planets, nil
 }
 
-func (r repo) FindByID(id string) (entity.Planet, error) {
-	planet := entity.Planet{}
+func (r repo) FindByName(ctx context.Context, name string) (*entity.Planet, error) {
+	coll, err := cnx(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer coll.Database().Client().Disconnect(ctx)
+
+	var planet entity.Planet
+
+	err = coll.FindOne(
+		ctx,
+		bson.M{"name": name},
+	).Decode(&planet)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &planet, nil
+}
+
+func (r repo) FindByID(ctx context.Context, id string) (*entity.Planet, error) {
 	_id, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		log.Print(err)
-		return planet, err
+		return nil, err
 	}
 
-	filter := bson.M{"_id": _id}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-
-	cnx, db, err := db(ctx, r)
-	defer cnx.Disconnect(ctx)
+	coll, err := cnx(ctx)
 
 	if err != nil {
-		log.Print(err)
-		return planet, err
+		return nil, err
 	}
 
-	err = db.FindOne(ctx, filter).Decode(&planet)
+	defer coll.Database().Client().Disconnect(ctx)
+
+	var planet entity.Planet
+
+	err = coll.FindOne(
+		ctx,
+		bson.M{"_id": _id},
+	).Decode(&planet)
 
 	if err != nil {
-		log.Print(err)
-		return planet, err
+		return nil, err
 	}
 
-	return planet, nil
+	return &planet, nil
 }
 
-func (r repo) Save(planet *entity.Planet) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-
-	cnx, db, err := db(ctx, r)
-	defer cnx.Disconnect(ctx)
+func (r repo) Save(ctx context.Context, planet *entity.Planet) error {
+	coll, err := cnx(ctx)
 
 	if err != nil {
-		log.Print(err)
 		return err
 	}
 
-	result, err := db.InsertOne(ctx, &planet)
+	defer coll.Database().Client().Disconnect(ctx)
+
+	result, err := coll.InsertOne(ctx, &planet)
 
 	if err != nil {
-		log.Print(err)
 		return err
 	}
 
@@ -141,67 +142,42 @@ func (r repo) Save(planet *entity.Planet) error {
 	return nil
 }
 
-func (r repo) Delete(id string) error {
+func (r repo) Delete(ctx context.Context, id string) error {
+	coll, err := cnx(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	defer coll.Database().Client().Disconnect(ctx)
+
 	_id, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		log.Print(err)
 		return err
 	}
 
-	filter := bson.M{"_id": _id}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-
-	cnx, db, err := db(ctx, r)
+	_, err = coll.DeleteOne(ctx, bson.M{"_id": _id})
 
 	if err != nil {
-		log.Print(err)
-		return err
-	}
-
-	_, err = db.DeleteOne(ctx, filter)
-	defer cnx.Disconnect(ctx)
-
-	if err != nil {
-		log.Print(err)
 		return err
 	}
 
 	return nil
 }
 
-func (r repo) FindAll(limit int64, skip int64) ([]entity.Planet, error) {
-	var planets []entity.Planet
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-
-	cnx, db, err := db(ctx, r)
-	defer cnx.Disconnect(ctx)
+func (r repo) Ping(ctx context.Context) string {
+	coll, err := cnx(ctx)
 
 	if err != nil {
-		log.Print(err)
-		return planets, err
+		return "error"
 	}
 
-	opt := options.Find()
-	opt.SetLimit(limit)
-	opt.SetSkip(skip)
+	defer coll.Database().Client().Disconnect(ctx)
 
-	cr, err := db.Find(ctx, bson.D{}, opt)
-
+	err = coll.Database().Client().Ping(ctx, readpref.Primary())
 	if err != nil {
-		log.Print(err)
-		return planets, err
+		return "error"
 	}
-
-	err = cr.All(ctx, &planets)
-
-	if err != nil {
-		log.Print(err)
-		return planets, err
-	}
-
-	return planets, nil
+	return "ok"
 }

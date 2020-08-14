@@ -1,6 +1,7 @@
 package planet
 
 import (
+	"context"
 	"star-wars/api/handler"
 	"star-wars/entity"
 	"star-wars/swapi"
@@ -8,12 +9,12 @@ import (
 
 // Service contract
 type Service interface {
-	Exists(name string) (bool, error)
-	Save(planet *entity.Planet) error
-	FindAll(limit int64, skip int64) ([]entity.Planet, error)
-	FindByName(name string) (entity.Planet, error)
-	FindByID(id string) (entity.Planet, error)
-	Delete(id string) error
+	Exists(ctx context.Context, name string) (bool, error)
+	Save(ctx context.Context, planet *entity.Planet) error
+	FindAll(ctx context.Context, limit int64, skip int64) (*[]entity.Planet, error)
+	FindByName(ctx context.Context, name string) (*entity.Planet, error)
+	FindByID(ctx context.Context, id string) (*entity.Planet, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type srv struct {
@@ -30,29 +31,31 @@ func NewService(r Repository, s swapi.Service) Service {
 }
 
 // Exists search planet in database
-func (s srv) Exists(name string) (bool, error) {
-	planetDb, err := s.repo.FindByName(name)
+func (s srv) Exists(ctx context.Context, name string) (bool, error) {
+	planet := entity.Planet{Name: name}
 
-	if err != nil && err.Error() != "mongo: no documents in result" {
-		return false, err
+	if planet.IsEmpty([]string{"Name"}) {
+		return false, handler.BadRequest{Message: "name is invalid"}
 	}
 
-	if planetDb.IsEmpty([]string{"ID"}) {
-		return false, nil
+	_, err := s.repo.FindByName(ctx, planet.Name)
+
+	if err != nil {
+		return false, err
 	}
 
 	return true, nil
 }
 
 // FindByName get planet
-func (s srv) FindByName(name string) (entity.Planet, error) {
-	var planet entity.Planet
+func (s srv) FindByName(ctx context.Context, name string) (*entity.Planet, error) {
+	planet := &entity.Planet{Name: name}
 
-	if name == "" {
-		return planet, handler.BadRequest{Message: "name is invalid"}
+	if planet.IsEmpty([]string{"Name"}) {
+		return nil, handler.BadRequest{Message: "name is invalid"}
 	}
 
-	planet, err := s.repo.FindByName(name)
+	planet, err := s.repo.FindByName(ctx, name)
 
 	if err != nil {
 		var newError error
@@ -61,21 +64,21 @@ func (s srv) FindByName(name string) (entity.Planet, error) {
 		} else {
 			newError = handler.InternalServer{Message: err.Error()}
 		}
-		return planet, newError
+		return nil, newError
 	}
 
 	return planet, nil
 }
 
 // FindByID get planet
-func (s srv) FindByID(id string) (entity.Planet, error) {
-	var planet entity.Planet
+func (s srv) FindByID(ctx context.Context, id string) (*entity.Planet, error) {
+	planet := &entity.Planet{ID: id}
 
-	if id == "" {
-		return planet, handler.BadRequest{Message: "id is invalid"}
+	if planet.IsEmpty([]string{"ID"}) {
+		return nil, handler.BadRequest{Message: "id is invalid"}
 	}
 
-	planet, err := s.repo.FindByID(id)
+	planet, err := s.repo.FindByID(ctx, id)
 
 	if err != nil {
 		var newError error
@@ -91,12 +94,12 @@ func (s srv) FindByID(id string) (entity.Planet, error) {
 }
 
 // Delete planet
-func (s srv) Delete(id string) error {
+func (s srv) Delete(ctx context.Context, id string) error {
 	if id == "" {
 		return handler.BadRequest{Message: "id is invalid"}
 	}
 
-	if err := s.repo.Delete(id); err != nil {
+	if err := s.repo.Delete(ctx, id); err != nil {
 		if err.Error() == "the provided hex string is not a valid ObjectID" {
 			return handler.BadRequest{Message: "id is invalid"}
 		}
@@ -106,20 +109,20 @@ func (s srv) Delete(id string) error {
 }
 
 // FindAll get planets
-func (s srv) FindAll(limit int64, skip int64) ([]entity.Planet, error) {
-	planets, err := s.repo.FindAll(limit, skip)
+func (s srv) FindAll(ctx context.Context, limit int64, skip int64) (*[]entity.Planet, error) {
+	planets, err := s.repo.FindAll(ctx, limit, skip)
 	if err != nil {
-		return planets, handler.InternalServer{Message: err.Error()}
+		return nil, handler.InternalServer{Message: err.Error()}
 	}
 	return planets, nil
 }
 
 // Save planet
-func (s srv) Save(planet *entity.Planet) error {
+func (s srv) Save(ctx context.Context, planet *entity.Planet) error {
 	name := planet.Name
-	exists, err := s.Exists(name)
+	exists, err := s.Exists(ctx, name)
 
-	if err != nil {
+	if err != nil && err.Error() != "mongo: no documents in result" {
 		return err
 	}
 
@@ -145,7 +148,7 @@ func (s srv) Save(planet *entity.Planet) error {
 
 	planet.TotalFilms = total
 
-	err = s.repo.Save(planet)
+	err = s.repo.Save(ctx, planet)
 
 	if err != nil {
 		return err
