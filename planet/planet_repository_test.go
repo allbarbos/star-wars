@@ -116,15 +116,16 @@ func monkeyMongoDBInsertOne(guard *monkey.PatchGuard, id string, err bool) *monk
 
 func monkeyMongoDBDeleteOne(guard *monkey.PatchGuard, err bool) *monkey.PatchGuard {
 	var coll *mongo.Collection
-	guard = monkey.PatchInstanceMethod(reflect.TypeOf(coll), "DeleteOne",
-		func(coll *mongo.Collection, ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
-			guard.Unpatch()
-			defer guard.Restore()
-			if err {
-				return nil, errors.New("delete one error")
-			}
-			return &mongo.DeleteResult{}, nil
-		})
+	mockFn := func(coll *mongo.Collection, ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+		guard.Unpatch()
+		defer guard.Restore()
+		if err {
+			return nil, errors.New("delete one error")
+		}
+		return &mongo.DeleteResult{}, nil
+	}
+
+	guard = monkey.PatchInstanceMethod(reflect.TypeOf(coll), "DeleteOne", mockFn)
 	return guard
 }
 
@@ -441,35 +442,20 @@ func TestDelete_Repository(t *testing.T) {
 		assert.Equal(t, "the provided hex string is not a valid ObjectID", err.Error())
 	})
 
-	// t.Run("when delete one returns error", func(t *testing.T) {
-	// 	var guardCnx monkey.PatchGuard
-	// 	monkeyCnx(&guardCnx, false)
+	t.Run("when delete one returns error", func(t *testing.T) {
+		var guardObjectIDFromHex monkey.PatchGuard
+		monkeyMongoDBObjectIDFromHex(&guardObjectIDFromHex, false)
 
-	// 	var guardObjectIDFromHex monkey.PatchGuard
-	// 	monkeyMongoDBObjectIDFromHex(&guardObjectIDFromHex, false)
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
 
-	// 	var guardDeleteOne monkey.PatchGuard
-	// 	monkeyMongoDBDeleteOne(&guardDeleteOne, true)
+		repo := NewRepository()
+		err := repo.Delete(ctx, "5f3080961f4799f091e3c515")
 
-	// 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	// 	defer cancel()
-
-	// 	repo := NewRepository()
-	// 	err := repo.Delete(ctx, "5f3080961f4799f091e3c515")
-
-	// 	assert.Equal(t, "delete one error", err.Error())
-	// })
+		assert.Equal(t, "the Database field must be set on Operation", err.Error())
+	})
 
 	// t.Run("happy path", func(t *testing.T) {
-	// 	var guardCnx monkey.PatchGuard
-	// 	monkeyCnx(&guardCnx, false)
-
-	// 	var guardObjectIDFromHex monkey.PatchGuard
-	// 	monkeyMongoDBObjectIDFromHex(&guardObjectIDFromHex, false)
-
-	// 	var guardDeleteOne monkey.PatchGuard
-	// 	monkeyMongoDBDeleteOne(&guardDeleteOne, false)
-
 	// 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	// 	defer cancel()
 
@@ -483,6 +469,9 @@ func TestDelete_Repository(t *testing.T) {
 
 func TestPing_Repository(t *testing.T) {
 	t.Run("when connection is ok", func(t *testing.T) {
+		var guardCnx monkey.PatchGuard
+		monkeyCnx(&guardCnx, false)
+
 		var guardPing monkey.PatchGuard
 		monkeyMongoDBPing(&guardPing, false)
 
@@ -498,6 +487,22 @@ func TestPing_Repository(t *testing.T) {
 	t.Run("when connection is not ok", func(t *testing.T) {
 		var guardPing monkey.PatchGuard
 		monkeyMongoDBPing(&guardPing, true)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+
+		repo := NewRepository()
+		status := repo.Ping(ctx)
+
+		assert.Equal(t, "error", status)
+	})
+
+	t.Run("when database is not acessible", func(t *testing.T) {
+		var guardPing monkey.PatchGuard
+		monkeyMongoDBPing(&guardPing, true)
+
+		var guardCnx monkey.PatchGuard
+		monkeyCnx(&guardCnx, true)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()

@@ -82,7 +82,7 @@ func main() {
 	planets := readCsv(csvfile)
 
 	s := swapi.New()
-	p := planet.NewService(planet.NewRepository()	, s)
+	p := planet.NewService(planet.NewRepository(), s)
 	srv := importer.NewImporter(p, s)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)

@@ -23,14 +23,14 @@ type Repository interface {
 	Ping(ctx context.Context) string
 }
 
-type repo struct {}
+type repo struct{}
 
 // NewRepository planet
 func NewRepository() Repository {
 	return &repo{}
 }
 
-func cnx(ctx context.Context) (*mongo.Collection, error){
+func cnx(ctx context.Context) (*mongo.Collection, error) {
 	c, _ := mongo.NewClient(options.Client().ApplyURI(os.Getenv("DB_HOST")))
 	err := c.Connect(ctx)
 	coll := c.Database(os.Getenv("DB_NAME")).Collection("planets")
