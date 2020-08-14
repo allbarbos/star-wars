@@ -13,41 +13,45 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var planetEntity entity.Planet = entity.Planet{
-	Name:       "Tatooine",
-	Climate:    "arid",
-	Terrain:    "desert",
-	TotalFilms: 5,
+var (
+	ctx, cancel               = context.WithTimeout(context.Background(), 2*time.Second)
+	pe          entity.Planet = entity.Planet{
+		Name:       "Tatooine",
+		Climate:    "arid",
+		Terrain:    "desert",
+		TotalFilms: 5,
+	}
+)
+
+func configDep(t *testing.T) (*gomock.Controller, *mock_planet.MockService, *mock_swapi.MockService) {
+	c := gomock.NewController(t)
+	ps := mock_planet.NewMockService(c)
+	s := mock_swapi.NewMockService(c)
+	return c, ps, s
 }
 
 func TestProcess(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	swapiMock := mock_swapi.NewMockService(ctrl)
-	planetMock := mock_planet.NewMockService(ctrl)
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-	planetMock.EXPECT().Save(ctx, &planetEntity).Return(nil)
-	planets := []entity.Planet{planetEntity}
+	t.Run("happy path", func(t *testing.T) {
+		c, ps, s := configDep(t)
+		defer c.Finish()
+		defer cancel()
+		ps.EXPECT().Save(ctx, &pe).Return(nil)
 
-	srv := NewImporter(planetMock, swapiMock)
-	errors := srv.Import(ctx, planets)
+		srv := NewImporter(ps, s)
+		errors := srv.Import(ctx, []entity.Planet{pe})
 
-	assert.Equal(t, 0, len(errors))
-}
+		assert.Equal(t, 0, len(errors))
+	})
 
-func TestProcess_SaveError(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	swapiMock := mock_swapi.NewMockService(ctrl)
-	planetMock := mock_planet.NewMockService(ctrl)
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-	planetMock.EXPECT().Save(ctx, &planetEntity).Return(errors.New("error"))
-	planets := []entity.Planet{planetEntity}
+	t.Run("when save returns error", func(t *testing.T) {
+		c, ps, s := configDep(t)
+		defer c.Finish()
+		defer cancel()
+		ps.EXPECT().Save(ctx, &pe).Return(errors.New("error"))
 
-	srv := NewImporter(planetMock, swapiMock)
-	errors := srv.Import(ctx, planets)
+		srv := NewImporter(ps, s)
+		errors := srv.Import(ctx, []entity.Planet{pe})
 
-	assert.Equal(t, 1, len(errors))
+		assert.Equal(t, 1, len(errors))
+	})
 }

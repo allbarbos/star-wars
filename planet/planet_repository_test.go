@@ -6,7 +6,6 @@ import (
 	"star-wars/entity"
 	"star-wars/planet/monkey_patch/mongo_db"
 	"testing"
-	"time"
 
 	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
@@ -38,7 +37,6 @@ func TestFindAll_Repository(t *testing.T) {
 		var guardCnx monkey.PatchGuard
 		monkeyCnx(&guardCnx, false)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -51,7 +49,6 @@ func TestFindAll_Repository(t *testing.T) {
 		var guardCnx monkey.PatchGuard
 		monkeyCnx(&guardCnx, true)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -70,7 +67,6 @@ func TestFindAll_Repository(t *testing.T) {
 		var guardFindError monkey.PatchGuard
 		mongo_db.Find(&guardFindError, true)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -89,7 +85,6 @@ func TestFindAll_Repository(t *testing.T) {
 		var guardAll monkey.PatchGuard
 		mongo_db.All(&guardAll, true)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -104,7 +99,6 @@ func TestFindByName_Repository(t *testing.T) {
 		var guardCnx monkey.PatchGuard
 		monkeyCnx(&guardCnx, true)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -123,7 +117,6 @@ func TestFindByName_Repository(t *testing.T) {
 		var guardDecode monkey.PatchGuard
 		mongo_db.Decode(&guardDecode, true)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -142,7 +135,6 @@ func TestFindByName_Repository(t *testing.T) {
 		var guardDecode monkey.PatchGuard
 		mongo_db.Decode(&guardDecode, false)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -157,7 +149,6 @@ func TestFindByID_Repository(t *testing.T) {
 		var guardObjectIDFromHex monkey.PatchGuard
 		mongo_db.ObjectIDFromHex(&guardObjectIDFromHex, true)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -173,7 +164,6 @@ func TestFindByID_Repository(t *testing.T) {
 		var guardCnx monkey.PatchGuard
 		monkeyCnx(&guardCnx, true)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -192,7 +182,6 @@ func TestFindByID_Repository(t *testing.T) {
 		var guardDecode monkey.PatchGuard
 		mongo_db.Decode(&guardDecode, true)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -211,7 +200,6 @@ func TestFindByID_Repository(t *testing.T) {
 		var guardDecode monkey.PatchGuard
 		mongo_db.Decode(&guardDecode, false)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -237,7 +225,6 @@ func TestSave_Repository(t *testing.T) {
 			TotalFilms: 1,
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -254,7 +241,6 @@ func TestSave_Repository(t *testing.T) {
 		var guardInsertOne monkey.PatchGuard
 		mongo_db.InsertOne(&guardInsertOne, "", true)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -271,7 +257,6 @@ func TestSave_Repository(t *testing.T) {
 		var guardCnx monkey.PatchGuard
 		monkeyCnx(&guardCnx, true)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -286,7 +271,6 @@ func TestDelete_Repository(t *testing.T) {
 		var guardCnx monkey.PatchGuard
 		monkeyCnx(&guardCnx, true)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -302,7 +286,6 @@ func TestDelete_Repository(t *testing.T) {
 		var guardObjectIDFromHex monkey.PatchGuard
 		mongo_db.ObjectIDFromHex(&guardObjectIDFromHex, true)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -315,7 +298,6 @@ func TestDelete_Repository(t *testing.T) {
 		var guardObjectIDFromHex monkey.PatchGuard
 		mongo_db.ObjectIDFromHex(&guardObjectIDFromHex, false)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -323,17 +305,6 @@ func TestDelete_Repository(t *testing.T) {
 
 		assert.Equal(t, "the Database field must be set on Operation", err.Error())
 	})
-
-	// t.Run("happy path", func(t *testing.T) {
-	// 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	// 	defer cancel()
-
-	// 	repo := NewRepository()
-
-	// 	err := repo.Delete(ctx, "abc")
-
-	// 	assert.Equal(t, nil, err)
-	// })
 }
 
 func TestPing_Repository(t *testing.T) {
@@ -344,7 +315,6 @@ func TestPing_Repository(t *testing.T) {
 		var guardPing monkey.PatchGuard
 		mongo_db.Ping(&guardPing, false)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -357,7 +327,6 @@ func TestPing_Repository(t *testing.T) {
 		var guardPing monkey.PatchGuard
 		mongo_db.Ping(&guardPing, true)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()
@@ -373,7 +342,6 @@ func TestPing_Repository(t *testing.T) {
 		var guardCnx monkey.PatchGuard
 		monkeyCnx(&guardCnx, true)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		repo := NewRepository()

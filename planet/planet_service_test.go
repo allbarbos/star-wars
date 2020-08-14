@@ -15,12 +15,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var (
+	ctx, cancel = context.WithTimeout(context.Background(), 2*time.Second)
+)
+
+func configDep(t *testing.T) (*gomock.Controller, *mock_planet.MockRepository, *mock_swapi.MockService) {
+	c := gomock.NewController(t)
+	r := mock_planet.NewMockRepository(c)
+	s := mock_swapi.NewMockService(c)
+	return c, r, s
+}
+
 func TestFindByName(t *testing.T) {
 	t.Run("sucess", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
+		c, r, s := configDep(t)
+		defer cancel()
+		defer c.Finish()
+
 		expected := entity.Planet{
 			ID:         "5f29e53f2939a742014a04af",
 			Name:       "Tatooine",
@@ -28,62 +39,50 @@ func TestFindByName(t *testing.T) {
 			Terrain:    "desert",
 			TotalFilms: 5,
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-		defer cancel()
+		r.EXPECT().FindByName(ctx, "Tatooine").Return(&expected, nil)
+		srv := NewService(r, s)
 
-		mockRepo.EXPECT().FindByName(ctx, "Tatooine").Return(&expected, nil)
-
-		srv := NewService(mockRepo, swapiMock)
 		result, _ := srv.FindByName(ctx, "Tatooine")
 
 		assert.Equal(t, expected, *result)
 	})
 
 	t.Run("when parameter name is invalid", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
 		defer cancel()
+		defer c.Finish()
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		_, err := srv.FindByName(ctx, "")
 
 		assert.Equal(t, "name is invalid", err.Error())
 	})
 
 	t.Run("when planet not found", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
 		defer cancel()
-		mockRepo.EXPECT().FindByName(ctx, "Tatooine").Return(
+		defer c.Finish()
+		r.EXPECT().FindByName(ctx, "Tatooine").Return(
 			nil,
 			errors.New("mongo: no documents in result"),
 		)
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		_, err := srv.FindByName(ctx, "Tatooine")
 
 		assert.Equal(t, "planet not found", err.Error())
 	})
 
 	t.Run("when repository returns error", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
-		mockRepo.EXPECT().FindByName(ctx, "Tatooine").Return(
+		r.EXPECT().FindByName(ctx, "Tatooine").Return(
 			nil,
 			errors.New("other errors"),
 		)
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		_, err := srv.FindByName(ctx, "Tatooine")
 
 		assert.Equal(t, "internal server error", err.Error())
@@ -92,10 +91,8 @@ func TestFindByName(t *testing.T) {
 
 func TestFindByID(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
+		c, r, s := configDep(t)
+		defer c.Finish()
 		expected := &entity.Planet{
 			ID:         "5f29e53f2939a742014a04af",
 			Name:       "Tatooine",
@@ -103,61 +100,50 @@ func TestFindByID(t *testing.T) {
 			Terrain:    "desert",
 			TotalFilms: 5,
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
-		mockRepo.EXPECT().FindByID(ctx, "5f29e53f2939a742014a04af").Return(expected, nil)
+		r.EXPECT().FindByID(ctx, "5f29e53f2939a742014a04af").Return(expected, nil)
+		srv := NewService(r, s)
 
-		srv := NewService(mockRepo, swapiMock)
 		result, _ := srv.FindByID(ctx, "5f29e53f2939a742014a04af")
 
 		assert.Equal(t, expected, result)
 	})
 
 	t.Run("when parameter id is invalid", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		_, err := srv.FindByID(ctx, "")
 
 		assert.Equal(t, "id is invalid", err.Error())
 	})
 
 	t.Run("when planet not found", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
-		mockRepo.EXPECT().FindByID(ctx, "Tatooine").Return(
+		r.EXPECT().FindByID(ctx, "Tatooine").Return(
 			nil,
 			errors.New("mongo: no documents in result"),
 		)
+		srv := NewService(r, s)
 
-		srv := NewService(mockRepo, swapiMock)
 		_, err := srv.FindByID(ctx, "Tatooine")
 
 		assert.Equal(t, "planet not found", err.Error())
 	})
 
 	t.Run("when repository returns error", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
-		mockRepo.EXPECT().FindByID(ctx, "Tatooine").Return(
+		r.EXPECT().FindByID(ctx, "Tatooine").Return(
 			nil,
 			errors.New("other errors"),
 		)
-
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		_, err := srv.FindByID(ctx, "Tatooine")
 
 		assert.Equal(t, "internal server error", err.Error())
@@ -166,10 +152,9 @@ func TestFindByID(t *testing.T) {
 
 func TestFindAll(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
+		c, r, s := configDep(t)
+		defer c.Finish()
+		defer cancel()
 
 		var limit, skip int64
 		limit = 3
@@ -198,34 +183,25 @@ func TestFindAll(t *testing.T) {
 				TotalFilms: 1,
 			},
 		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-		defer cancel()
-
-		mockRepo.EXPECT().FindAll(ctx, limit, skip).Return(&expected, nil)
-
-		srv := NewService(mockRepo, swapiMock)
+		r.EXPECT().FindAll(ctx, limit, skip).Return(&expected, nil)
+		srv := NewService(r, s)
 		result, _ := srv.FindAll(ctx, 3, 0)
 
 		assert.Equal(t, 3, len(*result))
 	})
 
 	t.Run("when find all returns error", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
+		c, r, s := configDep(t)
+		defer c.Finish()
+		defer cancel()
 
 		var limit, skip int64
 		limit = 3
 		skip = 0
 
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-		defer cancel()
+		r.EXPECT().FindAll(ctx, limit, skip).Return(nil, errors.New("error"))
+		srv := NewService(r, s)
 
-		mockRepo.EXPECT().FindAll(ctx, limit, skip).Return(nil, errors.New("error"))
-
-		srv := NewService(mockRepo, swapiMock)
 		_, err := srv.FindAll(ctx, 3, 0)
 
 		assert.Equal(t, handler.InternalServer{Message: "error"}, err)
@@ -234,14 +210,11 @@ func TestFindAll(t *testing.T) {
 
 func TestExists(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
 
-		mockRepo.EXPECT().FindByName(ctx, "Tatooine").Return(&entity.Planet{
+		r.EXPECT().FindByName(ctx, "Tatooine").Return(&entity.Planet{
 			ID:         "5f25e9782b148406adb55727",
 			Name:       "Tatooine",
 			Climate:    "arid",
@@ -249,53 +222,44 @@ func TestExists(t *testing.T) {
 			TotalFilms: 5,
 		}, nil)
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		result, _ := srv.Exists(ctx, "Tatooine")
 
 		assert.Equal(t, true, result)
 	})
 
 	t.Run("when name param is empty", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		_, err := srv.Exists(ctx, "")
 
 		assert.Equal(t, "name is invalid", err.Error())
 	})
 
 	t.Run("when there is no planet", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
 
-		mockRepo.EXPECT().FindByName(ctx, "Tatooine").Return(nil, errors.New("mongo: no documents in result"))
+		r.EXPECT().FindByName(ctx, "Tatooine").Return(nil, errors.New("mongo: no documents in result"))
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		result, _ := srv.Exists(ctx, "Tatooine")
 
 		assert.Equal(t, false, result)
 	})
 
 	t.Run("when db returns error", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
 
-		mockRepo.EXPECT().FindByName(ctx, "Tatooine").Return(nil, errors.New("others errors"))
+		r.EXPECT().FindByName(ctx, "Tatooine").Return(nil, errors.New("others errors"))
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		result, _ := srv.Exists(ctx, "Tatooine")
 
 		assert.Equal(t, false, result)
@@ -304,58 +268,46 @@ func TestExists(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
-		mockRepo.EXPECT().Delete(ctx, "5f2c88567563c4bae600d7df").Return(nil)
+		r.EXPECT().Delete(ctx, "5f2c88567563c4bae600d7df").Return(nil)
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		err := srv.Delete(ctx, "5f2c88567563c4bae600d7df")
 
 		assert.Equal(t, nil, err)
 	})
 
 	t.Run("when id parameter is empty", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		err := srv.Delete(ctx, "")
 
 		assert.Equal(t, "id is invalid", err.Error())
 	})
 
 	t.Run("when id parameter is invalid", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
-		mockRepo.EXPECT().Delete(ctx, "abc").Return(errors.New("the provided hex string is not a valid ObjectID"))
+		r.EXPECT().Delete(ctx, "abc").Return(errors.New("the provided hex string is not a valid ObjectID"))
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		err := srv.Delete(ctx, "abc")
 
 		assert.Equal(t, "id is invalid", err.Error())
 	})
 
 	t.Run("when db returns error", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
-		mockRepo.EXPECT().Delete(ctx, "abc").Return(errors.New("delete error"))
+		r.EXPECT().Delete(ctx, "abc").Return(errors.New("delete error"))
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		err := srv.Delete(ctx, "abc")
 
 		assert.Equal(t, "internal server error", err.Error())
@@ -364,11 +316,8 @@ func TestDelete(t *testing.T) {
 
 func TestSave(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
 
 		planet := &entity.Planet{
@@ -387,22 +336,19 @@ func TestSave(t *testing.T) {
 			},
 		}
 
-		mockRepo.EXPECT().Save(ctx, planet).Return(nil)
-		mockRepo.EXPECT().FindByName(ctx, "Tatooine").Return(nil, errors.New("mongo: no documents in result"))
-		swapiMock.EXPECT().GetPlanet("Tatooine").Return(adp, nil)
+		r.EXPECT().Save(ctx, planet).Return(nil)
+		r.EXPECT().FindByName(ctx, "Tatooine").Return(nil, errors.New("mongo: no documents in result"))
+		s.EXPECT().GetPlanet("Tatooine").Return(adp, nil)
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		err := srv.Save(ctx, planet)
 
 		assert.Equal(t, nil, err)
 	})
 
 	t.Run("when db returns error", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
 
 		planet := &entity.Planet{
@@ -412,20 +358,17 @@ func TestSave(t *testing.T) {
 			TotalFilms: 5,
 		}
 
-		mockRepo.EXPECT().FindByName(ctx, "Tatooine").Return(nil, errors.New("db error"))
+		r.EXPECT().FindByName(ctx, "Tatooine").Return(nil, errors.New("db error"))
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		err := srv.Save(ctx, planet)
 
 		assert.Equal(t, "db error", err.Error())
 	})
 
 	t.Run("when planet already registered, returns error", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
 
 		planet := &entity.Planet{
@@ -435,26 +378,23 @@ func TestSave(t *testing.T) {
 			TotalFilms: 5,
 		}
 
-		mockRepo.EXPECT().FindByName(ctx, "Tatooine").Return(planet, nil)
+		r.EXPECT().FindByName(ctx, "Tatooine").Return(planet, nil)
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		err := srv.Save(ctx, planet)
 
 		assert.Equal(t, "planet already registered", err.Error())
 	})
 
 	t.Run("when swapi api returns error", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
 
-		mockRepo.EXPECT().FindByName(ctx, "Tatooine").Return(nil, errors.New("mongo: no documents in result"))
-		swapiMock.EXPECT().GetPlanet("Tatooine").Return(adapter.Planets{}, handler.InternalServer{Message: "swapi error"})
+		r.EXPECT().FindByName(ctx, "Tatooine").Return(nil, errors.New("mongo: no documents in result"))
+		s.EXPECT().GetPlanet("Tatooine").Return(adapter.Planets{}, handler.InternalServer{Message: "swapi error"})
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		err := srv.Save(ctx, &entity.Planet{
 			Name:    "Tatooine",
 			Climate: "arid",
@@ -465,17 +405,14 @@ func TestSave(t *testing.T) {
 	})
 
 	t.Run("when swapi api not found planet", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
 
-		mockRepo.EXPECT().FindByName(ctx, "Test").Return(nil, errors.New("mongo: no documents in result"))
-		swapiMock.EXPECT().GetPlanet("Test").Return(adapter.Planets{}, nil)
+		r.EXPECT().FindByName(ctx, "Test").Return(nil, errors.New("mongo: no documents in result"))
+		s.EXPECT().GetPlanet("Test").Return(adapter.Planets{}, nil)
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		err := srv.Save(ctx, &entity.Planet{
 			Name:    "Test",
 			Climate: "arid",
@@ -486,11 +423,8 @@ func TestSave(t *testing.T) {
 	})
 
 	t.Run("when total appearances returns error", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
 
 		adp := adapter.Planets{
@@ -498,10 +432,10 @@ func TestSave(t *testing.T) {
 			Results: []adapter.Planet{},
 		}
 
-		mockRepo.EXPECT().FindByName(ctx, "Tatooine").Return(nil, errors.New("mongo: no documents in result"))
-		swapiMock.EXPECT().GetPlanet("Tatooine").Return(adp, nil)
+		r.EXPECT().FindByName(ctx, "Tatooine").Return(nil, errors.New("mongo: no documents in result"))
+		s.EXPECT().GetPlanet("Tatooine").Return(adp, nil)
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		err := srv.Save(ctx, &entity.Planet{
 			Name:       "Tatooine",
 			Climate:    "arid",
@@ -513,11 +447,8 @@ func TestSave(t *testing.T) {
 	})
 
 	t.Run("when save returns error", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockRepo := mock_planet.NewMockRepository(ctrl)
-		swapiMock := mock_swapi.NewMockService(ctrl)
-		defer ctrl.Finish()
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		c, r, s := configDep(t)
+		defer c.Finish()
 		defer cancel()
 
 		planet := &entity.Planet{
@@ -536,11 +467,11 @@ func TestSave(t *testing.T) {
 			},
 		}
 
-		mockRepo.EXPECT().Save(ctx, planet).Return(errors.New("db error"))
-		mockRepo.EXPECT().FindByName(ctx, "Tatooine").Return(nil, errors.New("mongo: no documents in result"))
-		swapiMock.EXPECT().GetPlanet("Tatooine").Return(adp, nil)
+		r.EXPECT().Save(ctx, planet).Return(errors.New("db error"))
+		r.EXPECT().FindByName(ctx, "Tatooine").Return(nil, errors.New("mongo: no documents in result"))
+		s.EXPECT().GetPlanet("Tatooine").Return(adp, nil)
 
-		srv := NewService(mockRepo, swapiMock)
+		srv := NewService(r, s)
 		err := srv.Save(ctx, planet)
 
 		assert.Equal(t, "db error", err.Error())
