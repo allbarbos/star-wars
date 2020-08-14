@@ -16,7 +16,7 @@ func TestHealthCheck(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	dbMock := mock_planet.NewMockRepository(ctrl)
-	dbMock.EXPECT().Ping().Return("ok")
+	dbMock.EXPECT().Ping(gomock.Any()).Return("ok")
 
 	HealthCheck{
 		DB: dbMock,
@@ -32,7 +32,7 @@ func TestHealthCheck_Error(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	dbMock := mock_planet.NewMockRepository(ctrl)
-	dbMock.EXPECT().Ping().Return("error")
+	dbMock.EXPECT().Ping(gomock.Any()).Return("error")
 
 	HealthCheck{
 		DB: dbMock,

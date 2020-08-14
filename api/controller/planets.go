@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"context"
 	"star-wars/api/handler"
 	"star-wars/entity"
 	"star-wars/planet"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -38,7 +40,10 @@ func (p Planets) All(c *gin.Context) {
 		return
 	}
 
-	planets, err := p.Srv.FindAll(limit, skip)
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	defer cancel()
+
+	planets, err := p.Srv.FindAll(ctx, limit, skip)
 
 	if err != nil {
 		handler.ResponseError(err, c)
@@ -51,7 +56,10 @@ func (p Planets) All(c *gin.Context) {
 // ByName get planet
 func (p Planets) ByName(c *gin.Context) {
 	name := c.Param("name")
-	planet, err := p.Srv.FindByName(name)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	planet, err := p.Srv.FindByName(ctx, name)
 
 	if err == nil {
 		handler.ResponseSuccess(200, planet, c)
@@ -63,10 +71,12 @@ func (p Planets) ByName(c *gin.Context) {
 // ByID get planet
 func (p Planets) ByID(c *gin.Context) {
 	id := c.Param("id")
-	planet, err := p.Srv.FindByID(id)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	planet, err := p.Srv.FindByID(ctx, id)
 
 	if err == nil {
-		handler.ResponseSuccess(200, planet, c)
+		handler.ResponseSuccess(200, &planet, c)
 	} else {
 		handler.ResponseError(err, c)
 	}
@@ -75,7 +85,10 @@ func (p Planets) ByID(c *gin.Context) {
 // Delete planet
 func (p Planets) Delete(c *gin.Context) {
 	id := c.Param("id")
-	err := p.Srv.Delete(id)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	err := p.Srv.Delete(ctx, id)
 
 	if err == nil {
 		handler.ResponseSuccess(200, nil, c)
@@ -109,7 +122,10 @@ func (p Planets) Post(c *gin.Context) {
 		return
 	}
 
-	err = p.Srv.Save(&planet)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	err = p.Srv.Save(ctx, &planet)
 
 	if err != nil {
 		handler.ResponseError(err, c)

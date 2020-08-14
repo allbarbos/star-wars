@@ -47,9 +47,7 @@ func healthCtrl() controller.HealthCheck {
 }
 
 func planetsCtrl() controller.Planets {
-	sw := swapi.New()
-	r := planet.NewRepository()
-	s := planet.NewService(r, sw)
+	s := planet.NewService(planet.NewRepository(), swapi.New())
 	return controller.Planets{
 		Srv: s,
 	}
