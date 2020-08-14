@@ -8,6 +8,7 @@ import (
 )
 
 var wg sync.WaitGroup
+var mutex = &sync.Mutex{}
 
 // Service contract
 type Service interface {
@@ -31,7 +32,9 @@ func saveTask(planet entity.Planet, srv planet.Service, errs *[]error) {
 	defer wg.Done()
 	err := srv.Save(&planet)
 	if err != nil {
+		mutex.Lock()
 		*errs = append(*errs, err)
+		mutex.Unlock()
 	}
 }
 
