@@ -3,6 +3,7 @@ module star-wars
 go 1.14
 
 require (
+	bou.ke/monkey v1.0.2
 	github.com/gin-gonic/gin v1.6.3
 	github.com/golang/mock v1.4.4
 	github.com/joho/godotenv v1.3.0

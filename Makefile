@@ -4,6 +4,9 @@ test:
 cov: test
 	go tool cover -html=cover.out
 
+fmt:
+	go fmt ./...
+	
 api:
 	cd api/cmd && go run main.go
 
