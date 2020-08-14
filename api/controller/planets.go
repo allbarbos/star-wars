@@ -40,7 +40,7 @@ func (p Planets) All(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
 	planets, err := p.Srv.FindAll(ctx, limit, skip)
