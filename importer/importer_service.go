@@ -1,6 +1,7 @@
 package importer
 
 import (
+	"context"
 	"star-wars/entity"
 	"star-wars/planet"
 	"star-wars/swapi"
@@ -12,7 +13,7 @@ var mutex = &sync.Mutex{}
 
 // Service contract
 type Service interface {
-	Import(planet []entity.Planet) []error
+	Import(ctx context.Context, planets []entity.Planet) []error
 }
 
 type service struct {
@@ -28,9 +29,9 @@ func NewImporter(s planet.Service, swapi swapi.Service) Service {
 	}
 }
 
-func saveTask(planet entity.Planet, srv planet.Service, errs *[]error) {
+func saveTask(ctx context.Context, planet entity.Planet, srv planet.Service, errs *[]error) {
 	defer wg.Done()
-	err := srv.Save(&planet)
+	err := srv.Save(ctx, &planet)
 	if err != nil {
 		mutex.Lock()
 		*errs = append(*errs, err)
@@ -39,12 +40,12 @@ func saveTask(planet entity.Planet, srv planet.Service, errs *[]error) {
 }
 
 // Import data import
-func (i service) Import(planets []entity.Planet) []error {
+func (i service) Import(ctx context.Context, planets []entity.Planet) []error {
 	var errs []error
 
 	for _, planet := range planets {
 		wg.Add(1)
-		go saveTask(planet, i.planetSrv, &errs)
+		go saveTask(ctx, planet, i.planetSrv, &errs)
 	}
 	wg.Wait()
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/csv"
 	"fmt"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"star-wars/importer"
 	"star-wars/planet"
 	"star-wars/swapi"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -80,11 +82,12 @@ func main() {
 	planets := readCsv(csvfile)
 
 	s := swapi.New()
-	r := planet.NewRepository()
-	p := planet.NewService(r, s)
+	p := planet.NewService(planet.NewRepository()	, s)
 	srv := importer.NewImporter(p, s)
 
-	errors := srv.Import(planets)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	errors := srv.Import(ctx, planets)
 
 	for _, err := range errors {
 		log.Print(err)
