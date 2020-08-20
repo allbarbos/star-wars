@@ -20,10 +20,10 @@ func Config() *gin.Engine {
 
 	router.GET("/health-check", healthCtrl().HealthCheck)
 	router.GET("/planets", planetsCtrl().All)
-	router.GET("/planets/id/:id", planetsCtrl().ByID)
-	router.GET("/planets/name/:name", planetsCtrl().ByName)
-	router.DELETE("/planets/:id", planetsCtrl().Delete)
+	router.GET("/planets/:id", planetsCtrl().ByID)
+	// router.GET("/planets/name/:name", planetsCtrl().ByName)
 	router.POST("/planets", planetsCtrl().Post)
+	router.DELETE("/planets/:id", planetsCtrl().Delete)
 
 	return router
 }

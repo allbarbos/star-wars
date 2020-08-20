@@ -40,10 +40,27 @@ func (p Planets) All(c *gin.Context) {
 		return
 	}
 
+	search := c.DefaultQuery("search", "")
+
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	planets, err := p.Srv.FindAll(ctx, limit, skip)
+	var planets *[]entity.Planet
+
+	if search == "" {
+		planets, err = p.Srv.FindAll(ctx, limit, skip)
+	} else {
+		planet, err := p.Srv.FindByName(ctx, search)
+
+		if err != nil {
+			handler.ResponseError(handler.BadRequest{Message: err.Error()}, c)
+			return
+		}
+
+		planets = &[]entity.Planet{
+			*planet,
+		}
+	}
 
 	if err != nil {
 		handler.ResponseError(err, c)
@@ -51,21 +68,6 @@ func (p Planets) All(c *gin.Context) {
 	}
 
 	handler.ResponseSuccess(200, planets, c)
-}
-
-// ByName get planet
-func (p Planets) ByName(c *gin.Context) {
-	name := c.Param("name")
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-
-	planet, err := p.Srv.FindByName(ctx, name)
-
-	if err == nil {
-		handler.ResponseSuccess(200, planet, c)
-	} else {
-		handler.ResponseError(err, c)
-	}
 }
 
 // ByID get planet
