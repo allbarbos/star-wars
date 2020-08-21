@@ -42,29 +42,18 @@ func TestByName(t *testing.T) {
 					TotalFilms: 2,
 				},
 			},
-			planet:         nil,
-			errPlanet:      nil,
-			errPlanets:     nil,
 			wantStatusCode: 200,
 			wantBody:       `[{"id":"5f2c891e9a9e070b1ef2e28c","name":"Alderaan","climate":"temperate","terrain":"grasslands, mountains","totalFilms":2}]`,
 		},
 		{
 			name:           "when get planet with an invalid limit parameter",
 			uri:            "http://t.test/?limit=a",
-			planets:        nil,
-			planet:         nil,
-			errPlanet:      nil,
-			errPlanets:     nil,
 			wantStatusCode: 400,
 			wantBody:       `{"error":"limit is invalid"}`,
 		},
 		{
 			name:           "when get planet with an invalid skip parameter",
 			uri:            "http://t.test/?skip=a",
-			planets:        nil,
-			planet:         nil,
-			errPlanet:      nil,
-			errPlanets:     nil,
 			wantStatusCode: 400,
 			wantBody:       `{"error":"skip is invalid"}`,
 		},
@@ -79,9 +68,6 @@ func TestByName(t *testing.T) {
 				Terrain:    "grasslands, mountains",
 				TotalFilms: 2,
 			},
-			errPlanet:      nil,
-			planets:        nil,
-			errPlanets:     nil,
 			wantStatusCode: 200,
 			wantBody:       `[{"id":"5f2c891e9a9e070b1ef2e28c","name":"Alderaan","climate":"temperate","terrain":"grasslands, mountains","totalFilms":2}]`,
 		},
@@ -89,19 +75,13 @@ func TestByName(t *testing.T) {
 			name:           "when get non-existent planet",
 			uri:            "http://t.test/?search=test",
 			findName:       "test",
-			planet:         nil,
 			errPlanet:      handler.NotFound{Message: "planet not found"},
-			planets:        nil,
-			errPlanets:     nil,
 			wantStatusCode: 400,
 			wantBody:       `{"error":"planet not found"}`,
 		},
 		{
 			name:           "when an error happens",
 			uri:            "http://t.test/?limit=1&skip=0",
-			planets:        nil,
-			planet:         nil,
-			errPlanet:      nil,
 			errPlanets:     handler.InternalServer{Message: "error"},
 			wantStatusCode: 500,
 			wantBody:       `{"error":"internal server error"}`,
@@ -145,193 +125,188 @@ func TestByName(t *testing.T) {
 }
 
 func TestByID(t *testing.T) {
-	t.Run("happy path", func(t *testing.T) {
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		pathParam := gin.Param{Key: "id", Value: "5f29e53f2939a742014a04af"}
-		c.Params = []gin.Param{pathParam}
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		srvMock := mock_planet.NewMockService(ctrl)
-		srvMock.EXPECT().FindByID(gomock.Any(), "5f29e53f2939a742014a04af").Return(
-			&entity.Planet{
+	t.Parallel()
+
+	type test struct {
+		name           string
+		idParam        string
+		planet         *entity.Planet
+		errPlanet      error
+		wantStatusCode int
+		wantBody       string
+	}
+
+	tests := []test{
+		{
+			name:    "happy path",
+			idParam: "5f29e53f2939a742014a04af",
+			planet: &entity.Planet{
 				ID:         "5f29e53f2939a742014a04af",
 				Name:       "Tatooine",
 				Climate:    "arid",
 				Terrain:    "desert",
 				TotalFilms: 5,
 			},
-			nil,
-		)
+			wantStatusCode: 200,
+			wantBody:       `{"id":"5f29e53f2939a742014a04af","name":"Tatooine","climate":"arid","terrain":"desert","totalFilms":5}`,
+		},
+		{
+			name:           "error",
+			idParam:        "NotFound",
+			errPlanet:      handler.NotFound{Message: "planet not found"},
+			wantStatusCode: 404,
+			wantBody:       `{"error":"planet not found"}`,
+		},
+	}
 
-		Planets{
-			Srv: srvMock,
-		}.ByID(c)
+	for _, tt := range tests {
+		tt := tt
 
-		assert.Equal(t, 200, w.Code)
-		assert.Equal(
-			t,
-			`{"id":"5f29e53f2939a742014a04af","name":"Tatooine","climate":"arid","terrain":"desert","totalFilms":5}`,
-			w.Body.String(),
-		)
-	})
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-	t.Run("error", func(t *testing.T) {
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		pathParam := gin.Param{Key: "id", Value: "NotFound"}
-		c.Params = []gin.Param{pathParam}
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		srvMock := mock_planet.NewMockService(ctrl)
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Params = []gin.Param{{Key: "id", Value: tt.idParam}}
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			srvMock := mock_planet.NewMockService(ctrl)
+			srvMock.EXPECT().FindByID(gomock.Any(), tt.idParam).Return(tt.planet, tt.errPlanet)
 
-		srvMock.EXPECT().FindByID(gomock.Any(), "NotFound").Return(nil, handler.NotFound{Message: "planet not found"})
+			Planets{
+				Srv: srvMock,
+			}.ByID(c)
 
-		Planets{
-			Srv: srvMock,
-		}.ByID(c)
-
-		assert.Equal(t, 404, w.Code)
-		assert.Equal(t, `{"error":"planet not found"}`, w.Body.String())
-	})
+			assert.Equal(t, tt.wantStatusCode, w.Code)
+			assert.Equal(t, tt.wantBody, w.Body.String())
+		})
+	}
 }
 
 func TestDelete(t *testing.T) {
-	t.Run("happy path", func(t *testing.T) {
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		pathParam := gin.Param{Key: "id", Value: "5f29e53f2939a742014a04af"}
-		c.Params = []gin.Param{pathParam}
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		srvMock := mock_planet.NewMockService(ctrl)
-		srvMock.EXPECT().Delete(gomock.Any(), "5f29e53f2939a742014a04af").Return(nil)
+	t.Parallel()
 
-		Planets{
-			Srv: srvMock,
-		}.Delete(c)
+	type test struct {
+		name           string
+		idParam        string
+		planet         *entity.Planet
+		err            error
+		wantStatusCode int
+		wantBody       string
+	}
 
-		assert.Equal(t, 200, w.Code)
-	})
+	tests := []test{
+		{
+			name:           "happy path",
+			idParam:        "5f29e53f2939a742014a04af",
+			wantStatusCode: 200,
+			wantBody:       ``,
+		},
+		{
+			name:           "error",
+			idParam:        "5f29e53f2939a742014a04af",
+			err:            handler.InternalServer{Message: "error"},
+			wantStatusCode: 500,
+			wantBody:       `{"error":"internal server error"}`,
+		},
+	}
 
-	t.Run("error", func(t *testing.T) {
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		pathParam := gin.Param{Key: "id", Value: "5f29e53f2939a742014a04af"}
-		c.Params = []gin.Param{pathParam}
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		srvMock := mock_planet.NewMockService(ctrl)
-		srvMock.EXPECT().Delete(gomock.Any(), "5f29e53f2939a742014a04af").Return(handler.InternalServer{Message: "error"})
+	for _, tt := range tests {
+		tt := tt
 
-		Planets{
-			Srv: srvMock,
-		}.Delete(c)
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-		assert.Equal(t, 500, w.Code)
-		assert.Equal(t, `{"error":"internal server error"}`, w.Body.String())
-	})
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Params = []gin.Param{{Key: "id", Value: tt.idParam}}
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			srvMock := mock_planet.NewMockService(ctrl)
+			srvMock.EXPECT().Delete(gomock.Any(), tt.idParam).Return(tt.err)
+
+			Planets{
+				Srv: srvMock,
+			}.Delete(c)
+
+			assert.Equal(t, tt.wantStatusCode, w.Code)
+			assert.Equal(t, tt.wantBody, w.Body.String())
+		})
+	}
 }
 
 func TestPost(t *testing.T) {
-	t.Run("happy path", func(t *testing.T) {
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		body := bytes.NewBufferString(`{"name":"Kamino","climate":"temperate","terrain":"ocean"}`)
-		c.Request, _ = http.NewRequest("POST", "/planets", body)
+	t.Parallel()
 
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		srvMock := mock_planet.NewMockService(ctrl)
+	type test struct {
+		name           string
+		body           string
+		planet         *entity.Planet
+		err            error
+		wantStatusCode int
+		wantBody       string
+	}
 
-		srvMock.EXPECT().Save(
-			gomock.Any(),
-			&entity.Planet{
+	tests := []test{
+		{
+			name: "happy path",
+			body: `{"name":"Kamino","climate":"temperate","terrain":"ocean"}`,
+			planet: &entity.Planet{
 				Name:    "Kamino",
 				Climate: "temperate",
 				Terrain: "ocean",
 			},
-		).Return(nil)
-
-		Planets{
-			Srv: srvMock,
-		}.Post(c)
-
-		assert.Equal(t, 201, w.Code)
-	})
-
-	t.Run("InvalidPayload", func(t *testing.T) {
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		body := bytes.NewBufferString(``)
-		c.Request, _ = http.NewRequest("POST", "/planets", body)
-
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		srvMock := mock_planet.NewMockService(ctrl)
-
-		Planets{
-			Srv: srvMock,
-		}.Post(c)
-
-		assert.Equal(t, 400, w.Code)
-		assert.Equal(
-			t,
-			`{"error":"body is invalid"}`,
-			w.Body.String(),
-		)
-	})
-
-	t.Run("InvalidFields", func(t *testing.T) {
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		body := bytes.NewBufferString(`{"name":"","climate":"temperate","terrain":"ocean"}`)
-		c.Request, _ = http.NewRequest("POST", "/planets", body)
-
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		srvMock := mock_planet.NewMockService(ctrl)
-
-		Planets{
-			Srv: srvMock,
-		}.Post(c)
-
-		assert.Equal(t, 400, w.Code)
-		assert.Equal(
-			t,
-			`{"error":"name, climate and terrain is required"}`,
-			w.Body.String(),
-		)
-	})
-
-	t.Run("InternalError", func(t *testing.T) {
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		body := bytes.NewBufferString(`{"name":"Kamino","climate":"temperate","terrain":"ocean"}`)
-		c.Request, _ = http.NewRequest("POST", "/planets", body)
-
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
-		srvMock := mock_planet.NewMockService(ctrl)
-
-		srvMock.EXPECT().Save(
-			gomock.Any(),
-			&entity.Planet{
+			wantStatusCode: 201,
+		},
+		{
+			name:           "when invalid payload",
+			body:           ``,
+			wantStatusCode: 400,
+			wantBody:       `{"error":"body is invalid"}`,
+		},
+		{
+			name:           "when invalid fields",
+			body:           `{"name":"","climate":"temperate","terrain":"ocean"}`,
+			wantStatusCode: 400,
+			wantBody:       `{"error":"name, climate and terrain is required"}`,
+		},
+		{
+			name: "when internal error",
+			body: `{"name":"Kamino","climate":"temperate","terrain":"ocean"}`,
+			planet: &entity.Planet{
 				Name:    "Kamino",
 				Climate: "temperate",
 				Terrain: "ocean",
 			},
-		).Return(handler.BadRequest{Message: "planet already registered"})
+			err:            handler.BadRequest{Message: "planet already registered"},
+			wantStatusCode: 400,
+			wantBody:       `{"error":"name, climate and terrain is required"}`,
+		},
+	}
 
-		Planets{
-			Srv: srvMock,
-		}.Post(c)
+	for _, tt := range tests {
+		tt := tt
 
-		assert.Equal(t, 400, w.Code)
-		assert.Equal(
-			t,
-			`{"error":"planet already registered"}`,
-			w.Body.String(),
-		)
-	})
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Request, _ = http.NewRequest("POST", "/planets", bytes.NewBufferString(tt.body))
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			srvMock := mock_planet.NewMockService(ctrl)
+
+			if tt.planet != nil || tt.err != nil {
+				srvMock.EXPECT().Save(gomock.Any(), tt.planet).Return(tt.err)
+			}
+
+			Planets{
+				Srv: srvMock,
+			}.Post(c)
+
+			assert.Equal(t, tt.wantStatusCode, w.Code)
+		})
+	}
 }
