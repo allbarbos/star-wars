@@ -3,20 +3,14 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 	"star-wars/api"
+	"star-wars/env"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	port := ":" + env.Vars.Api.Port
 
-	port := ":" + os.Getenv("PORT")
 	if port == ":" {
 		log.Fatal("PORT must be set")
 	}

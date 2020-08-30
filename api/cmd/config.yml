@@ -1,0 +1,10 @@
+api:
+  env: development
+  port: 8000
+
+database:
+  name: star-wars
+  host: mongodb://localhost:27017
+
+swapi:
+  url: https://swapi.dev/api

@@ -1,0 +1,10 @@
+importer:
+  env: development
+  path-csv: seed.csv
+
+database:
+  name: star-wars
+  host: mongodb://localhost:27017
+
+swapi:
+  url: https://swapi.dev/api

@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
+	"star-wars/env"
 	"star-wars/swapi/adapter"
 )
 
@@ -24,7 +24,7 @@ func New() Service {
 func (s swapi) GetPlanet(name string) (adapter.Planets, error) {
 	var adapter adapter.Planets
 
-	resp, err := http.Get(os.Getenv("SWAPI_URL") + "/planets/?search=" + url.QueryEscape(name))
+	resp, err := http.Get(env.Vars.Swapi.Url + "/planets/?search=" + url.QueryEscape(name))
 
 	if err != nil {
 		log.Print(err)

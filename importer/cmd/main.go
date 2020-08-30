@@ -8,23 +8,15 @@ import (
 	"log"
 	"os"
 	"star-wars/entity"
+	"star-wars/env"
 	"star-wars/importer"
 	"star-wars/planet"
 	"star-wars/swapi"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
-func loadEnv() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-}
-
 func openCsv() *os.File {
-	csvfile, err := os.Open(os.Getenv("PATH_CSV"))
+	csvfile, err := os.Open(env.Vars.Importer.PathCsv)
 	if err != nil {
 		log.Fatalln("couldn't open the csv file", err)
 	}
@@ -76,8 +68,6 @@ func readCsv(file *os.File) []entity.Planet {
 }
 
 func main() {
-	loadEnv()
-
 	csvfile := openCsv()
 	planets := readCsv(csvfile)
 

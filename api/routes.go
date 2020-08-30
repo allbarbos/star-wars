@@ -2,8 +2,8 @@ package api
 
 import (
 	"net/http"
-	"os"
 	"star-wars/api/controller"
+	"star-wars/env"
 	"star-wars/planet"
 	"star-wars/swapi"
 
@@ -11,7 +11,7 @@ import (
 )
 
 func Config() *gin.Engine {
-	if os.Getenv("ENV") == "production" {
+	if env.Vars.Api.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -21,7 +21,6 @@ func Config() *gin.Engine {
 	router.GET("/health-check", healthCtrl().HealthCheck)
 	router.GET("/planets", planetsCtrl().All)
 	router.GET("/planets/:id", planetsCtrl().ByID)
-	// router.GET("/planets/name/:name", planetsCtrl().ByName)
 	router.POST("/planets", planetsCtrl().Post)
 	router.DELETE("/planets/:id", planetsCtrl().Delete)
 

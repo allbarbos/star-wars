@@ -3,8 +3,8 @@ package planet
 import (
 	"context"
 	"log"
-	"os"
 	"star-wars/entity"
+	"star-wars/env"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -31,9 +31,9 @@ func NewRepository() Repository {
 }
 
 func cnx(ctx context.Context) (*mongo.Collection, error) {
-	c, _ := mongo.NewClient(options.Client().ApplyURI(os.Getenv("DB_HOST")))
+	c, _ := mongo.NewClient(options.Client().ApplyURI(env.Vars.Database.Host))
 	err := c.Connect(ctx)
-	coll := c.Database(os.Getenv("DB_NAME")).Collection("planets")
+	coll := c.Database(env.Vars.Database.Name).Collection("planets")
 
 	return coll, err
 }
